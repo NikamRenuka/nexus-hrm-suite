@@ -307,7 +307,7 @@ const OrganizationUsers: React.FC = () => {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
-      case 'hr': return 'warning';
+      case 'hr': return 'secondary';
       case 'manager': return 'secondary';
       default: return 'outline';
     }
@@ -794,3 +794,4 @@ const OrganizationUsers: React.FC = () => {
 };
 
 export default OrganizationUsers;
+
