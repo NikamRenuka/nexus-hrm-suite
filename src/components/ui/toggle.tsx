@@ -13,6 +13,8 @@ const toggleVariants = cva(
         default: "bg-transparent",
         outline:
           "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+        warning: 
+          "bg-orange-500 text-white hover:bg-orange-600",
       },
       size: {
         default: "h-10 px-3",
@@ -42,4 +44,3 @@ const Toggle = React.forwardRef<
 Toggle.displayName = TogglePrimitive.Root.displayName
 
 export { Toggle, toggleVariants }
-

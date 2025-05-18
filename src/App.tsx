@@ -80,6 +80,7 @@ import MyGoals from "./pages/performance/MyGoals";
 import RequestsApprovals from "./pages/workflow/RequestsApprovals";
 import AttendanceHistory from "./pages/reports/AttendanceHistory";
 import LeaveSummary from "./pages/reports/LeaveSummary";
+import EmployeeAttendance from "./pages/employees/EmployeeAttendance";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +115,7 @@ const App = () => (
             <Route path="/employees/list" element={<EmployeeList />} />
             <Route path="/employees/departments" element={<Departments />} />
             <Route path="/employees/documents" element={<Documents />} />
+            <Route path="/employees/attendance" element={<EmployeeAttendance />} />
             <Route path="/payroll/structure" element={<SalaryStructure />} />
             <Route path="/payroll/generation" element={<SalaryGeneration />} />
             <Route path="/payroll/bank-advice" element={<BankAdvice />} />
