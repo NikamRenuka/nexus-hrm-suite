@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { mockUser } from '@/lib/mockData';
 import { UserRole } from '@/lib/types';
+import { toast } from '@/hooks/use-toast';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
@@ -31,12 +32,50 @@ export const LoginForm: React.FC = () => {
     setTimeout(() => {
       if (email && password) {
         // In a real app, you would validate credentials with Supabase here
+        
+        // For testing purposes, we'll save the selected role in localStorage
+        const testUser = {
+          ...mockUser,
+          role: role,
+          email: email
+        };
+        
+        localStorage.setItem('hrmsUser', JSON.stringify(testUser));
+        
+        // Show success toast
+        toast({
+          title: "Login successful",
+          description: `Welcome ${testUser.name}, you are logged in as ${role.replace('_', ' ').toUpperCase()}`,
+        });
+        
         navigate('/dashboard');
       } else {
         setError('Please enter both email and password');
       }
       setIsLoading(false);
     }, 1000);
+  };
+
+  // Sample test credentials for each role
+  const testCredentials = {
+    super_admin: { email: 'superadmin@example.com', password: 'password' },
+    admin: { email: 'admin@example.com', password: 'password' },
+    hr: { email: 'hr@example.com', password: 'password' },
+    manager: { email: 'manager@example.com', password: 'password' },
+    employee: { email: 'employee@example.com', password: 'password' },
+  };
+
+  // Auto-fill credentials based on selected role
+  const fillCredentials = (selectedRole: UserRole) => {
+    setEmail(testCredentials[selectedRole].email);
+    setPassword(testCredentials[selectedRole].password);
+  };
+
+  // Update credentials when role changes
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRole = e.target.value as UserRole;
+    setRole(newRole);
+    fillCredentials(newRole);
   };
 
   return (
@@ -86,7 +125,7 @@ export const LoginForm: React.FC = () => {
             <select
               id="role"
               value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
+              onChange={handleRoleChange}
               className="w-full border border-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-hrms-primary/20"
             >
               <option value="super_admin">Super Admin</option>
@@ -112,8 +151,17 @@ export const LoginForm: React.FC = () => {
           </Button>
         </form>
         
-        <div className="text-center text-sm">
-          <span className="text-muted-foreground">Demo access: hr@example.com / password</span>
+        <div className="text-center text-sm space-y-2">
+          <p className="text-muted-foreground">Demo access by role:</p>
+          <div className="grid grid-cols-1 gap-1 text-xs">
+            {Object.entries(testCredentials).map(([role, cred]) => (
+              <div key={role} className="p-1 rounded bg-gray-50 flex justify-between">
+                <span className="font-medium">{role.replace('_', ' ')}:</span>
+                <span>{cred.email}</span>
+              </div>
+            ))}
+            <p className="mt-2 text-muted-foreground">Use password: "password" for all accounts</p>
+          </div>
         </div>
       </CardContent>
     </Card>
