@@ -8,7 +8,8 @@ import {
   Edit, 
   Trash, 
   Shield, 
-  Building
+  Building,
+  X as XCircle // Importing X icon from lucide-react and aliasing it as XCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
