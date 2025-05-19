@@ -1,17 +1,14 @@
 
 import React, { useState } from 'react';
 import { 
-  UserCog, 
+  Users, 
   Plus, 
   Search, 
   MoreHorizontal, 
   Edit, 
   Trash, 
-  ShieldCheck,
-  Lock,
-  Unlock,
-  Check,
-  X
+  Shield, 
+  Building
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,7 +17,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -33,147 +29,124 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectTrigger, 
-  SelectValue, 
-  SelectContent, 
-  SelectItem, 
-  SelectGroup,
-  SelectLabel
-} from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface OrganizationUser {
+interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'hr' | 'manager' | 'employee';
-  companyId: string;
-  companyName: string;
-  status: 'active' | 'inactive' | 'locked';
-  lastLogin?: string;
-  isMFA: boolean;
+  role: 'super_admin' | 'admin' | 'hr' | 'manager' | 'employee';
+  company: string;
+  lastLogin: string;
+  isActive: boolean;
 }
 
-interface Company {
-  id: string;
-  name: string;
-}
-
-const MOCK_COMPANIES: Company[] = [
-  { id: 'comp1', name: 'Acme Corporation' },
-  { id: 'comp2', name: 'Globex Industries' },
-  { id: 'comp3', name: 'Stark Innovations' },
-  { id: 'comp4', name: 'Wayne Enterprises' },
-  { id: 'comp5', name: 'Umbrella Corp' }
-];
-
-const MOCK_USERS: OrganizationUser[] = [
+const MOCK_USERS: User[] = [
   {
     id: '1',
-    name: 'John Smith',
-    email: 'john.smith@acme.com',
+    name: 'Admin User',
+    email: 'admin@acme.com',
     role: 'admin',
-    companyId: 'comp1',
-    companyName: 'Acme Corporation',
-    status: 'active',
-    lastLogin: '2023-10-18 10:25 AM',
-    isMFA: true
+    company: 'Acme Corporation',
+    lastLogin: '2023-05-18 09:23:12',
+    isActive: true
   },
   {
     id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah.j@globex.com',
+    name: 'Sarah Miller',
+    email: 'hr@globex.com',
     role: 'hr',
-    companyId: 'comp2',
-    companyName: 'Globex Industries',
-    status: 'active',
-    lastLogin: '2023-10-18 09:15 AM',
-    isMFA: false
+    company: 'Globex Industries',
+    lastLogin: '2023-05-17 14:45:30',
+    isActive: true
   },
   {
     id: '3',
-    name: 'David Miller',
-    email: 'david.m@stark.io',
+    name: 'Robert Johnson',
+    email: 'manager@stark.io',
     role: 'manager',
-    companyId: 'comp3',
-    companyName: 'Stark Innovations',
-    status: 'active',
-    lastLogin: '2023-10-17 04:30 PM',
-    isMFA: true
+    company: 'Stark Innovations',
+    lastLogin: '2023-05-16 08:12:55',
+    isActive: true
   },
   {
     id: '4',
-    name: 'James Wilson',
-    email: 'james.w@wayne.co',
+    name: 'Emily Clark',
+    email: 'employee@wayne.co',
     role: 'employee',
-    companyId: 'comp4',
-    companyName: 'Wayne Enterprises',
-    status: 'locked',
-    lastLogin: '2023-10-10 11:45 AM',
-    isMFA: false
+    company: 'Wayne Enterprises',
+    lastLogin: '2023-05-15 17:30:22',
+    isActive: false
   },
   {
     id: '5',
-    name: 'Patricia Garcia',
-    email: 'patricia.g@umbrella.org',
-    role: 'admin',
-    companyId: 'comp5',
-    companyName: 'Umbrella Corp',
-    status: 'inactive',
-    isMFA: false
+    name: 'System Administrator',
+    email: 'superadmin@system.com',
+    role: 'super_admin',
+    company: 'System Admin',
+    lastLogin: '2023-05-18 11:05:45',
+    isActive: true
   }
 ];
 
 const OrganizationUsers: React.FC = () => {
-  const [users, setUsers] = useState<OrganizationUser[]>(MOCK_USERS);
+  const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>('all');
-  const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<OrganizationUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
-    role: 'employee' as 'admin' | 'hr' | 'manager' | 'employee',
-    companyId: '',
-    status: 'active' as 'active' | 'inactive' | 'locked',
-    isMFA: false
+    role: 'employee',
+    company: '',
+    isActive: true,
   });
 
-  const filteredUsers = users.filter(user => {
-    // Filter by search term
-    const matchesSearch = 
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.companyName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Filter by company
-    const matchesCompany = selectedCompanyFilter === 'all' || user.companyId === selectedCompanyFilter;
-    
-    // Filter by role
-    const matchesRole = selectedRoleFilter === 'all' || user.role === selectedRoleFilter;
-    
-    return matchesSearch && matchesCompany && matchesRole;
-  });
+  // Mock companies for the select dropdown
+  const companies = ['Acme Corporation', 'Globex Industries', 'Stark Innovations', 'Wayne Enterprises', 'Umbrella Corp'];
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'super_admin':
+        return 'destructive';
+      case 'admin':
+        return 'default';
+      case 'hr':
+        return 'secondary';
+      case 'manager':
+        return 'outline';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.company.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleAddUser = () => {
     const id = Math.random().toString(36).substring(7);
-    const companyName = MOCK_COMPANIES.find(c => c.id === newUser.companyId)?.name || '';
+    const currentDate = new Date().toISOString().replace('T', ' ').substring(0, 19);
     
-    const userToAdd: OrganizationUser = {
+    const userToAdd = {
       id,
       name: newUser.name,
       email: newUser.email,
-      role: newUser.role,
-      companyId: newUser.companyId,
-      companyName,
-      status: newUser.status,
-      isMFA: newUser.isMFA
+      role: newUser.role as 'super_admin' | 'admin' | 'hr' | 'manager' | 'employee',
+      company: newUser.company,
+      lastLogin: currentDate,
+      isActive: newUser.isActive
     };
     
     setUsers([...users, userToAdd]);
@@ -182,29 +155,21 @@ const OrganizationUsers: React.FC = () => {
       name: '',
       email: '',
       role: 'employee',
-      companyId: '',
-      status: 'active',
-      isMFA: false
+      company: '',
+      isActive: true,
     });
     
     toast({
       title: "User added",
-      description: `${userToAdd.name} has been added as ${userToAdd.role} at ${companyName}.`,
+      description: `${userToAdd.name} has been added successfully.`,
     });
   };
 
   const handleEditUser = () => {
     if (!selectedUser) return;
     
-    // Update company name if companyId changed
-    let updatedUser = {...selectedUser};
-    if (selectedUser.companyId !== updatedUser.companyId) {
-      const companyName = MOCK_COMPANIES.find(c => c.id === updatedUser.companyId)?.name || '';
-      updatedUser = {...updatedUser, companyName};
-    }
-    
     const updatedUsers = users.map(user => 
-      user.id === updatedUser.id ? updatedUser : user
+      user.id === selectedUser.id ? selectedUser : user
     );
     
     setUsers(updatedUsers);
@@ -213,7 +178,7 @@ const OrganizationUsers: React.FC = () => {
     
     toast({
       title: "User updated",
-      description: `${updatedUser.name}'s information has been updated.`,
+      description: `${selectedUser.name}'s information has been updated.`,
     });
   };
 
@@ -229,98 +194,42 @@ const OrganizationUsers: React.FC = () => {
     
     toast({
       title: "User deleted",
-      description: `${selectedUser.name} has been deleted from the system.`,
+      description: `${selectedUser.name} has been removed from the system.`,
     });
     
     setSelectedUser(null);
   };
 
-  const handleResetPassword = () => {
-    if (!selectedUser) return;
-    
-    setIsResetPasswordDialogOpen(false);
-    
-    toast({
-      title: "Password reset link sent",
-      description: `A password reset link has been sent to ${selectedUser.email}.`,
-    });
-    
-    setSelectedUser(null);
-  };
-
-  const handleToggleUserStatus = (user: OrganizationUser) => {
-    const newStatus = user.status === 'active' ? 'inactive' : 'active';
-    
-    const updatedUsers = users.map(u => 
-      u.id === user.id ? {...u, status: newStatus as 'active' | 'inactive' | 'locked'} : u
+  const toggleUserStatus = (userId: string) => {
+    const updatedUsers = users.map(user => 
+      user.id === userId ? { ...user, isActive: !user.isActive } : user
     );
     
     setUsers(updatedUsers);
     
-    toast({
-      title: `User ${newStatus === 'active' ? 'activated' : 'deactivated'}`,
-      description: `${user.name} has been ${newStatus === 'active' ? 'activated' : 'deactivated'}.`,
-    });
+    const user = users.find(user => user.id === userId);
+    if (user) {
+      toast({
+        title: user.isActive ? "User deactivated" : "User activated",
+        description: `${user.name} has been ${user.isActive ? 'deactivated' : 'activated'}.`,
+      });
+    }
   };
 
-  const handleUnlockUser = (user: OrganizationUser) => {
-    const updatedUsers = users.map(u => 
-      u.id === user.id ? {...u, status: 'active' as const} : u
-    );
-    
-    setUsers(updatedUsers);
-    
-    toast({
-      title: "User unlocked",
-      description: `${user.name}'s account has been unlocked.`,
-    });
-  };
-
-  const handleToggleMFA = (user: OrganizationUser) => {
-    const updatedUsers = users.map(u => 
-      u.id === user.id ? {...u, isMFA: !u.isMFA} : u
-    );
-    
-    setUsers(updatedUsers);
-    
-    toast({
-      title: `MFA ${!user.isMFA ? 'Enabled' : 'Disabled'}`,
-      description: `Multi-factor authentication has been ${!user.isMFA ? 'enabled' : 'disabled'} for ${user.name}.`,
-    });
-  };
-
-  const openEditDialog = (user: OrganizationUser) => {
+  const openEditDialog = (user: User) => {
     setSelectedUser({...user});
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (user: OrganizationUser) => {
+  const openDeleteDialog = (user: User) => {
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
-  };
-
-  const openResetPasswordDialog = (user: OrganizationUser) => {
-    setSelectedUser(user);
-    setIsResetPasswordDialogOpen(true);
-  };
-
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'admin': return 'destructive';
-      case 'hr': return 'secondary';
-      case 'manager': return 'secondary';
-      default: return 'outline';
-    }
-  };
-
-  const getRoleLabel = (role: string) => {
-    return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Organization Users</h1>
+        <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add User
@@ -329,102 +238,52 @@ const OrganizationUsers: React.FC = () => {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Users Management</CardTitle>
-          <div className="flex flex-col md:flex-row justify-between space-y-4 md:space-y-0 md:space-x-4">
-            <div className="flex items-center w-full md:w-1/3">
-              <Search className="h-4 w-4 mr-2 text-muted-foreground" />
-              <Input
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full md:w-2/3">
-              <Select value={selectedCompanyFilter} onValueChange={setSelectedCompanyFilter}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by Company" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Companies</SelectItem>
-                  {MOCK_COMPANIES.map(company => (
-                    <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={selectedRoleFilter} onValueChange={setSelectedRoleFilter}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="hr">HR</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="employee">Employee</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <CardTitle>Platform Users</CardTitle>
+          <div className="flex items-center">
+            <Search className="h-4 w-4 mr-2 text-muted-foreground" />
+            <Input
+              placeholder="Search users..."
+              className="w-full max-w-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
-            <div className="hidden md:grid grid-cols-12 px-4 py-3 bg-muted/50 text-sm font-medium">
-              <div className="col-span-3">Name / Email</div>
-              <div className="col-span-2">Company</div>
-              <div className="col-span-1">Role</div>
-              <div className="col-span-1">Status</div>
-              <div className="col-span-2">Last Login</div>
-              <div className="col-span-1">MFA</div>
-              <div className="col-span-2 text-right">Actions</div>
+            <div className="grid grid-cols-7 px-4 py-3 bg-muted/50 text-sm font-medium">
+              <div className="col-span-2">User</div>
+              <div>Role</div>
+              <div>Company</div>
+              <div>Last Login</div>
+              <div>Status</div>
+              <div className="text-right">Actions</div>
             </div>
             <div className="divide-y">
               {filteredUsers.map((user) => (
-                <div key={user.id} className="grid grid-cols-1 md:grid-cols-12 px-4 py-3 items-center gap-y-2 md:gap-y-0">
-                  <div className="col-span-3 flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-3 flex-shrink-0">
-                      {user.name.substring(0, 2).toUpperCase()}
+                <div key={user.id} className="grid grid-cols-7 px-4 py-3 items-center">
+                  <div className="col-span-2 flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-3">
+                      {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                     </div>
                     <div>
                       <div className="font-medium">{user.name}</div>
                       <div className="text-sm text-muted-foreground">{user.email}</div>
                     </div>
                   </div>
-
-                  <div className="md:hidden font-medium text-sm text-muted-foreground">Company</div>
-                  <div className="col-span-2">{user.companyName}</div>
-                  
-                  <div className="md:hidden font-medium text-sm text-muted-foreground">Role</div>
-                  <div className="col-span-1">
+                  <div>
                     <Badge variant={getRoleBadgeVariant(user.role)}>
-                      {getRoleLabel(user.role)}
+                      {user.role.replace('_', ' ')}
                     </Badge>
                   </div>
-                  
-                  <div className="md:hidden font-medium text-sm text-muted-foreground">Status</div>
-                  <div className="col-span-1">
-                    <Badge variant={
-                      user.status === 'active' ? 'default' : 
-                      user.status === 'inactive' ? 'secondary' : 
-                      'outline'
-                    }>
-                      {user.status}
+                  <div>{user.company}</div>
+                  <div>{user.lastLogin}</div>
+                  <div>
+                    <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                      {user.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
-                  
-                  <div className="md:hidden font-medium text-sm text-muted-foreground">Last Login</div>
-                  <div className="col-span-2">
-                    {user.lastLogin || 'Never logged in'}
-                  </div>
-                  
-                  <div className="md:hidden font-medium text-sm text-muted-foreground">MFA</div>
-                  <div className="col-span-1">
-                    {user.isMFA ? 
-                      <Check className="h-5 w-5 text-green-500" /> : 
-                      <X className="h-5 w-5 text-red-500" />
-                    }
-                  </div>
-                  
-                  <div className="col-span-2 flex justify-end">
+                  <div className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
@@ -437,40 +296,20 @@ const OrganizationUsers: React.FC = () => {
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openResetPasswordDialog(user)}>
-                          <Lock className="h-4 w-4 mr-2" />
-                          Reset Password
+                        <DropdownMenuItem onClick={() => toggleUserStatus(user.id)}>
+                          {user.isActive ? (
+                            <>
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <Shield className="h-4 w-4 mr-2" />
+                              Activate
+                            </>
+                          )}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleToggleMFA(user)}>
-                          <ShieldCheck className="h-4 w-4 mr-2" />
-                          {user.isMFA ? 'Disable MFA' : 'Enable MFA'}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        {user.status === 'locked' ? (
-                          <DropdownMenuItem onClick={() => handleUnlockUser(user)}>
-                            <Unlock className="h-4 w-4 mr-2" />
-                            Unlock Account
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem onClick={() => handleToggleUserStatus(user)}>
-                            {user.status === 'active' ? (
-                              <>
-                                <X className="h-4 w-4 mr-2" />
-                                Deactivate
-                              </>
-                            ) : (
-                              <>
-                                <Check className="h-4 w-4 mr-2" />
-                                Activate
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => openDeleteDialog(user)}
-                          className="text-red-600"
-                        >
+                        <DropdownMenuItem onClick={() => openDeleteDialog(user)} className="text-red-600">
                           <Trash className="h-4 w-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -482,7 +321,7 @@ const OrganizationUsers: React.FC = () => {
               
               {filteredUsers.length === 0 && (
                 <div className="px-4 py-8 text-center text-muted-foreground">
-                  No users found matching your criteria.
+                  No users found matching your search.
                 </div>
               )}
             </div>
@@ -492,230 +331,169 @@ const OrganizationUsers: React.FC = () => {
 
       {/* Add User Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
             <DialogDescription>
-              Add a new user to the organization. They will receive an email to set their password.
+              Add a new user to the platform. All fields are required.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                  placeholder="Enter full name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                  placeholder="email@example.com"
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                value={newUser.name}
+                onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                placeholder="Enter user's full name"
+              />
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="company">Company</Label>
-                <Select 
-                  value={newUser.companyId} 
-                  onValueChange={(value) => setNewUser({...newUser, companyId: value})}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select company" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Companies</SelectLabel>
-                      {MOCK_COMPANIES.map(company => (
-                        <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select 
-                  value={newUser.role} 
-                  onValueChange={(value: 'admin' | 'hr' | 'manager' | 'employee') => 
-                    setNewUser({...newUser, role: value})
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Roles</SelectLabel>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="hr">HR</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="employee">Employee</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newUser.email}
+                onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                placeholder="user@example.com"
+              />
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={newUser.status} 
-                  onValueChange={(value: 'active' | 'inactive' | 'locked') => 
-                    setNewUser({...newUser, status: value})
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Status</SelectLabel>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end space-x-2">
-                <input
-                  type="checkbox"
-                  id="mfa"
-                  checked={newUser.isMFA}
-                  onChange={(e) => setNewUser({...newUser, isMFA: e.target.checked})}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <Label htmlFor="mfa">Require Multi-Factor Authentication</Label>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={newUser.role}
+                onValueChange={(value) => setNewUser({...newUser, role: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="hr">HR</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="employee">Employee</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company</Label>
+              <Select
+                value={newUser.company}
+                onValueChange={(value) => setNewUser({...newUser, company: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map(company => (
+                    <SelectItem key={company} value={company}>{company}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={newUser.isActive ? "active" : "inactive"}
+                onValueChange={(value) => setNewUser({...newUser, isActive: value === "active"})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddUser}>
-              <UserCog className="h-4 w-4 mr-2" />
-              Add User
-            </Button>
+            <Button onClick={handleAddUser}>Add User</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
             <DialogDescription>
-              Update user details and permissions.
+              Make changes to the user information.
             </DialogDescription>
           </DialogHeader>
           {selectedUser && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-name">Full Name</Label>
-                  <Input
-                    id="edit-name"
-                    value={selectedUser.name}
-                    onChange={(e) => setSelectedUser({...selectedUser, name: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-email">Email Address</Label>
-                  <Input
-                    id="edit-email"
-                    type="email"
-                    value={selectedUser.email}
-                    onChange={(e) => setSelectedUser({...selectedUser, email: e.target.value})}
-                  />
-                </div>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="edit-name">Full Name</Label>
+                <Input
+                  id="edit-name"
+                  value={selectedUser.name}
+                  onChange={(e) => setSelectedUser({...selectedUser, name: e.target.value})}
+                />
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-company">Company</Label>
-                  <Select 
-                    value={selectedUser.companyId} 
-                    onValueChange={(value) => setSelectedUser({...selectedUser, companyId: value})}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Companies</SelectLabel>
-                        {MOCK_COMPANIES.map(company => (
-                          <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-role">Role</Label>
-                  <Select 
-                    value={selectedUser.role} 
-                    onValueChange={(value: 'admin' | 'hr' | 'manager' | 'employee') => 
-                      setSelectedUser({...selectedUser, role: value})
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Roles</SelectLabel>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="hr">HR</SelectItem>
-                        <SelectItem value="manager">Manager</SelectItem>
-                        <SelectItem value="employee">Employee</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={selectedUser.email}
+                  onChange={(e) => setSelectedUser({...selectedUser, email: e.target.value})}
+                />
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-status">Status</Label>
-                  <Select 
-                    value={selectedUser.status} 
-                    onValueChange={(value: 'active' | 'inactive' | 'locked') => 
-                      setSelectedUser({...selectedUser, status: value})
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Status</SelectLabel>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                        <SelectItem value="locked">Locked</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-end space-x-2">
-                  <input
-                    type="checkbox"
-                    id="edit-mfa"
-                    checked={selectedUser.isMFA}
-                    onChange={(e) => setSelectedUser({...selectedUser, isMFA: e.target.checked})}
-                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <Label htmlFor="edit-mfa">Require Multi-Factor Authentication</Label>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-role">Role</Label>
+                <Select
+                  value={selectedUser.role}
+                  onValueChange={(value) => setSelectedUser({
+                    ...selectedUser, 
+                    role: value as 'super_admin' | 'admin' | 'hr' | 'manager' | 'employee'
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="hr">HR</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="employee">Employee</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-company">Company</Label>
+                <Select
+                  value={selectedUser.company}
+                  onValueChange={(value) => setSelectedUser({...selectedUser, company: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map(company => (
+                      <SelectItem key={company} value={company}>{company}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="edit-status">Status</Label>
+                <Select
+                  value={selectedUser.isActive ? "active" : "inactive"}
+                  onValueChange={(value) => setSelectedUser({...selectedUser, isActive: value === "active"})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
@@ -730,7 +508,7 @@ const OrganizationUsers: React.FC = () => {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
+            <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete this user? This action cannot be undone.
             </DialogDescription>
@@ -740,52 +518,13 @@ const OrganizationUsers: React.FC = () => {
               <p className="mb-2">You are about to delete:</p>
               <div className="p-4 rounded-md bg-muted">
                 <p className="font-medium">{selectedUser.name}</p>
-                <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
-                <p className="text-sm text-muted-foreground">{selectedUser.companyName} • {selectedUser.role}</p>
-              </div>
-              <div className="mt-4 text-amber-600 text-sm flex items-start">
-                <ShieldCheck className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                <p>Deleting this user will remove all of their account data and access permissions. Consider deactivating their account instead if you might need to restore access in the future.</p>
+                <p className="text-sm text-muted-foreground">{selectedUser.email} • {selectedUser.role.replace('_', ' ')}</p>
               </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDeleteUser}>
-              <Trash className="h-4 w-4 mr-2" />
-              Delete User
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Reset Password Dialog */}
-      <Dialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Reset Password</DialogTitle>
-            <DialogDescription>
-              Send a password reset link to this user.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedUser && (
-            <div className="py-4">
-              <p className="mb-2">You are about to send a password reset email to:</p>
-              <div className="p-4 rounded-md bg-muted">
-                <p className="font-medium">{selectedUser.name}</p>
-                <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
-              </div>
-              <div className="mt-4 text-sm">
-                <p>The user will receive a secure link to set a new password. The current password will no longer work after this action.</p>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsResetPasswordDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleResetPassword}>
-              <Lock className="h-4 w-4 mr-2" />
-              Send Reset Link
-            </Button>
+            <Button variant="destructive" onClick={handleDeleteUser}>Delete User</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -794,4 +533,3 @@ const OrganizationUsers: React.FC = () => {
 };
 
 export default OrganizationUsers;
-

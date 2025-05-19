@@ -1,542 +1,367 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format } from 'date-fns';
-import { Download, Calendar as CalendarIcon, BarChart, PieChart, LineChart, ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { 
+  BarChart, Bar, 
+  LineChart, Line, 
+  PieChart, Pie, Cell, 
+  ResponsiveContainer, 
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend
+} from 'recharts';
+import { BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, Download } from 'lucide-react';
 
 const SuperAdminReports: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('system');
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [timeRange, setTimeRange] = useState('month');
   
+  // Mock data for the charts
+  const usersByCompanyData = [
+    { name: 'Acme Corp', users: 245 },
+    { name: 'Globex', users: 187 },
+    { name: 'Stark Inc', users: 128 },
+    { name: 'Wayne Ent', users: 95 },
+    { name: 'Umbrella', users: 76 }
+  ];
+
+  const userRolesData = [
+    { name: 'Employees', value: 1850 },
+    { name: 'Managers', value: 420 },
+    { name: 'HR', value: 180 },
+    { name: 'Admins', value: 95 },
+    { name: 'Super Admins', value: 12 }
+  ];
+  
+  const growthData = [
+    { month: 'Jan', companies: 145, users: 1850 },
+    { month: 'Feb', companies: 152, users: 1950 },
+    { month: 'Mar', companies: 165, users: 2120 },
+    { month: 'Apr', companies: 172, users: 2250 },
+    { month: 'May', companies: 184, users: 2390 },
+    { month: 'Jun', companies: 200, users: 2520 },
+    { month: 'Jul', companies: 220, users: 2600 },
+    { month: 'Aug', companies: 232, users: 2680 },
+    { month: 'Sep', companies: 248, users: 2750 }
+  ];
+
+  const securityAlertsData = [
+    { name: 'Failed Logins', value: 28 },
+    { name: 'New Location Logins', value: 15 },
+    { name: 'Admin Role Changes', value: 7 },
+    { name: 'Password Resets', value: 32 }
+  ];
+
+  const supportTicketsData = [
+    { month: 'Jan', open: 23, resolved: 20 },
+    { month: 'Feb', open: 28, resolved: 25 },
+    { month: 'Mar', open: 20, resolved: 18 },
+    { month: 'Apr', open: 27, resolved: 24 },
+    { month: 'May', open: 18, resolved: 15 },
+    { month: 'Jun', open: 24, resolved: 22 },
+    { month: 'Jul', open: 15, resolved: 13 },
+    { month: 'Aug', open: 19, resolved: 17 },
+    { month: 'Sep', open: 16, resolved: 13 }
+  ];
+  
+  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088fe'];
+
+  const pieChartConfig = {
+    'Employees': { color: '#8884d8' },
+    'Managers': { color: '#82ca9d' },
+    'HR': { color: '#ffc658' },
+    'Admins': { color: '#ff8042' },
+    'Super Admins': { color: '#0088fe' },
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Platform Reports</h1>
-        <p className="text-muted-foreground">
-          System-wide analytics and reporting for super administrators
-        </p>
-      </div>
-      
       <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Platform Reports</h1>
+          <p className="text-muted-foreground">
+            Comprehensive analytics and statistics across the entire platform.
+          </p>
+        </div>
         <div className="flex items-center space-x-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="w-[240px] justify-start text-left font-normal">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, 'PPP') : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          
-          <Select defaultValue="30d">
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Select timeframe" />
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Time Range" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="year">Last year</SelectItem>
+              <SelectItem value="week">Last 7 days</SelectItem>
+              <SelectItem value="month">Last 30 days</SelectItem>
+              <SelectItem value="quarter">Last 3 months</SelectItem>
+              <SelectItem value="year">Last 12 months</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" size="icon">
+            <Download className="h-4 w-4" />
+          </Button>
         </div>
-        
-        <Button size="sm">
-          <Download className="mr-2 h-4 w-4" /> Export Report
-        </Button>
       </div>
-      
-      <Tabs defaultValue="system" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="system">System</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="companies">Companies</TabsTrigger>
-          <TabsTrigger value="financial">Financial</TabsTrigger>
+
+      <Tabs defaultValue="overview">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="users">Users & Companies</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="support">Support</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="system" className="space-y-4">
-          {/* System Health Metrics */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <TabsContent value="overview" className="space-y-6 mt-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Uptime</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">99.98%</div>
-                <p className="text-xs text-muted-foreground">
-                  +0.1% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg. Response Time</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">235ms</div>
-                <p className="text-xs text-muted-foreground">
-                  -15ms from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">API Requests</CardTitle>
-                <BarChart className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">2.4M</div>
-                <p className="text-xs text-muted-foreground">
-                  +12% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Error Rate</CardTitle>
-                <LineChart className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0.05%</div>
-                <p className="text-xs text-muted-foreground">
-                  -0.02% from last month
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>System Overview</CardTitle>
-                <CardDescription>
-                  Platform health metrics for the last 30 days
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">System performance chart would appear here</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>Resource Usage</CardTitle>
-                <CardDescription>
-                  Server CPU, memory, and storage metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">Resource usage chart would appear here</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="users" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">18,492</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-500 flex items-center">
-                    <ArrowUpIcon className="h-3 w-3 mr-1" /> +8.2%
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">14,985</div>
-                <p className="text-xs text-muted-foreground">
-                  81% of total users
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Users</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">1,245</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-500 flex items-center">
-                    <ArrowUpIcon className="h-3 w-3 mr-1" /> +12.8%
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Admin Users</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">246</div>
-                <p className="text-xs text-muted-foreground">
-                  Across all companies
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>User Growth</CardTitle>
-                <CardDescription>
-                  New user registrations over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">User growth chart would appear here</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>User Roles Distribution</CardTitle>
-                <CardDescription>
-                  Breakdown of users by role type
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">Role distribution chart would appear here</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="companies" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Companies</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M3 3v18h18" />
-                  <path d="m18.7 8.7-4.2-4.2-6 6L3 15" />
-                </svg>
+                <CardTitle className="text-sm font-medium">
+                  Total Companies
+                </CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">248</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-500 flex items-center">
-                    <ArrowUpIcon className="h-3 w-3 mr-1" /> +5.3%
-                  </span>
-                  from last month
-                </p>
+                <p className="text-xs text-muted-foreground">+12% from last month</p>
+                <div className="h-[80px] mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={growthData.slice(-5)} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                      <Bar dataKey="companies" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Companies</CardTitle>
-                <BarChart className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">
+                  Total Users
+                </CardTitle>
+                <LineChartIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">236</div>
-                <p className="text-xs text-muted-foreground">
-                  95% of total companies
-                </p>
+                <div className="text-2xl font-bold">2,557</div>
+                <p className="text-xs text-muted-foreground">+4.5% from last month</p>
+                <div className="h-[80px] mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={growthData.slice(-5)} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                      <Line type="monotone" dataKey="users" stroke="#82ca9d" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Companies</CardTitle>
-                <BarChart className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">
+                  User Roles Distribution
+                </CardTitle>
+                <PieChartIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">
-                  Added this month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg. Company Size</CardTitle>
-                <PieChart className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">75</div>
-                <p className="text-xs text-muted-foreground">
-                  Employees per company
-                </p>
+                <div className="h-[120px]">
+                  <ChartContainer
+                    config={pieChartConfig}
+                    className="h-[120px]"
+                  >
+                    <PieChart>
+                      <Pie
+                        data={userRolesData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={25}
+                        outerRadius={50}
+                        paddingAngle={2}
+                        dataKey="value"
+                        label={false}
+                      >
+                        {userRolesData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <ChartTooltip
+                        content={<ChartTooltipContent />}
+                      />
+                    </PieChart>
+                  </ChartContainer>
+                </div>
+                <div className="flex justify-center space-x-4 text-xs mt-2">
+                  {userRolesData.map((entry, index) => (
+                    <div key={`legend-${index}`} className="flex items-center">
+                      <div 
+                        className="w-3 h-3 rounded-full mr-1"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      ></div>
+                      {entry.name}
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>
           
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card className="col-span-1">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
               <CardHeader>
-                <CardTitle>Company Growth</CardTitle>
-                <CardDescription>
-                  New company registrations over time
-                </CardDescription>
+                <CardTitle>Platform Growth</CardTitle>
+                <CardDescription>Companies and users growth over time</CardDescription>
               </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">Company growth chart would appear here</p>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={growthData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip />
+                      <Legend />
+                      <Line yAxisId="left" type="monotone" dataKey="companies" stroke="#8884d8" activeDot={{ r: 8 }} />
+                      <Line yAxisId="right" type="monotone" dataKey="users" stroke="#82ca9d" />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
-            <Card className="col-span-1">
+            <Card>
               <CardHeader>
-                <CardTitle>Company Industry Distribution</CardTitle>
-                <CardDescription>
-                  Breakdown of companies by industry
-                </CardDescription>
+                <CardTitle>Support Tickets</CardTitle>
+                <CardDescription>Open vs resolved tickets per month</CardDescription>
               </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">Industry distribution chart would appear here</p>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={supportTicketsData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="open" fill="#8884d8" />
+                      <Bar dataKey="resolved" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
         
-        <TabsContent value="financial" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <TabsContent value="users" className="space-y-6 mt-6">
+          <div className="grid gap-6 md:grid-cols-2">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$428,560</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-500 flex items-center">
-                    <ArrowUpIcon className="h-3 w-3 mr-1" /> +12.5%
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Monthly Recurring</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$385,240</div>
-                <p className="text-xs text-muted-foreground">
-                  +1.8% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg. Subscription</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$1,540</div>
-                <p className="text-xs text-muted-foreground">
-                  Per company/month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Churn Rate</CardTitle>
-                <ArrowDownIcon className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">0.8%</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-green-500 flex items-center">
-                    <ArrowDownIcon className="h-3 w-3 mr-1" /> -0.3%
-                  </span>
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card className="col-span-1">
               <CardHeader>
-                <CardTitle>Revenue Growth</CardTitle>
-                <CardDescription>
-                  Monthly revenue over the past year
-                </CardDescription>
+                <CardTitle>Users by Company</CardTitle>
+                <CardDescription>Distribution of users across top companies</CardDescription>
               </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">Revenue chart would appear here</p>
+              <CardContent>
+                <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={usersByCompanyData}
+                      layout="vertical"
+                      margin={{ top: 20, right: 30, left: 60, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="name" type="category" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="users" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
-            <Card className="col-span-1">
+            <Card>
               <CardHeader>
-                <CardTitle>Subscription Plans</CardTitle>
-                <CardDescription>
-                  Distribution of subscription plans
-                </CardDescription>
+                <CardTitle>User Role Distribution</CardTitle>
+                <CardDescription>Breakdown of users by their roles</CardDescription>
               </CardHeader>
-              <CardContent className="pl-2">
-                <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
-                  <p className="text-muted-foreground">Subscription plans chart would appear here</p>
+              <CardContent>
+                <div className="h-[400px] flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={userRolesData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={true}
+                        outerRadius={130}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {userRolesData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => [`${value} users`, 'Count']} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="security" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Alerts</CardTitle>
+              <CardDescription>Distribution of security incidents by type</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={securityAlertsData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="#ff8042" name="Count" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="support" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Support Ticket Trends</CardTitle>
+              <CardDescription>Open vs resolved tickets over time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={supportTicketsData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="open" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="resolved" stroke="#82ca9d" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
