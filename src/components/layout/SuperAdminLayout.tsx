@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Building, Shield, Settings, BarChart, HeadsetHelp, AppsIcon } from 'lucide-react';
+import { Building, Shield, Settings, BarChart, Headset, AppWindow } from 'lucide-react';
 
 const SuperAdminLayout: React.FC = () => {
   const location = useLocation();
@@ -26,13 +26,13 @@ const SuperAdminLayout: React.FC = () => {
     { 
       path: '/applications', 
       label: 'Applications', 
-      icon: AppsIcon,
+      icon: AppWindow,
       description: 'Manage system applications and integrations.'
     },
     { 
       path: '/support', 
       label: 'Support', 
-      icon: HeadsetHelp,
+      icon: Headset,
       description: 'Provide support for platform clients.'
     },
     { 

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { HeadsetHelp, Search, Filter, MessageSquare, CheckCircle, Clock, AlertCircle, MoreHorizontal, UserPlus } from 'lucide-react';
+import { Headset, Search, Filter, MessageSquare, CheckCircle, Clock, AlertCircle, MoreHorizontal, UserPlus } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -235,7 +235,7 @@ const SupportServices: React.FC = () => {
           </p>
         </div>
         <Button className="mt-4 sm:mt-0">
-          <HeadsetHelp className="mr-2 h-4 w-4" /> New Support Request
+          <Headset className="mr-2 h-4 w-4" /> New Support Request
         </Button>
       </div>
 

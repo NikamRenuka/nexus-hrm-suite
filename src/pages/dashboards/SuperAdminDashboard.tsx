@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowUpIcon, ArrowDownIcon, Building, Users, ShieldCheck, Clock, AlertTriangle, HeadsetHelp } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon, Building, Users, ShieldCheck, Clock, AlertTriangle, Headset } from "lucide-react";
 
 const SuperAdminDashboard: React.FC = () => {
   return (
@@ -61,7 +60,7 @@ const SuperAdminDashboard: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Tickets</CardTitle>
-            <HeadsetHelp className="h-4 w-4 text-muted-foreground" />
+            <Headset className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">13</div>
@@ -101,7 +100,7 @@ const SuperAdminDashboard: React.FC = () => {
             </Link>
             <Link to="/support">
               <Button variant="outline" className="w-full justify-start">
-                <HeadsetHelp className="mr-2 h-4 w-4" />
+                <Headset className="mr-2 h-4 w-4" />
                 Support
               </Button>
             </Link>
