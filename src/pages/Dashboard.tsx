@@ -13,13 +13,20 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get user role from either query params (for testing) or from mockUser
+  // Get user role from either query params (for testing) or from localStorage
   const queryParams = new URLSearchParams(location.search);
   const testRole = queryParams.get('role') as UserRole | null;
   
   // Retrieve user from localStorage or use default role
   const userStr = localStorage.getItem('hrmsUser');
   const user = userStr ? JSON.parse(userStr) : { role: testRole || 'hr' };
+  
+  // Redirect super_admin to the super admin dashboard
+  useEffect(() => {
+    if (user.role === 'super_admin' && location.pathname === '/dashboard') {
+      navigate('/super-admin');
+    }
+  }, [user.role, location.pathname, navigate]);
   
   // Render dashboard based on user role
   const renderDashboard = () => {

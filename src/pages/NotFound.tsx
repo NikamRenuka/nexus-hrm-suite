@@ -1,53 +1,39 @@
 
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Home } from 'lucide-react';
 
-const NotFound = () => {
-  const location = useLocation();
+const NotFound: React.FC = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
-  const handleGoBack = () => {
+  const goBack = () => {
     navigate(-1);
   };
 
-  const handleGoHome = () => {
-    navigate("/dashboard");
+  const goHome = () => {
+    navigate('/dashboard');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
-        <h1 className="text-6xl font-bold mb-4 text-red-500">404</h1>
-        <p className="text-2xl text-gray-800 font-semibold mb-2">Page Not Found</p>
-        <p className="text-gray-600 mb-6">
-          The page you are looking for doesn't exist or has been moved.
-        </p>
-        <p className="text-gray-500 mb-8 text-sm">
-          Path: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{location.pathname}</span>
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button 
-            variant="outline" 
-            className="flex items-center justify-center gap-2"
-            onClick={handleGoBack}
-          >
-            <ArrowLeft size={16} />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+      <div className="w-full max-w-md text-center space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-6xl font-bold text-gray-900">404</h1>
+          <h2 className="text-2xl font-semibold text-gray-700">Page Not Found</h2>
+          <p className="text-gray-600">
+            The page you are looking for doesn't exist or has been moved.
+          </p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+          <Button onClick={goBack} variant="outline" className="flex items-center">
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Go Back
           </Button>
-          <Button 
-            className="flex items-center justify-center"
-            onClick={handleGoHome}
-          >
-            Return to Dashboard
+          <Button onClick={goHome} className="flex items-center">
+            <Home className="mr-2 h-4 w-4" />
+            Go to Dashboard
           </Button>
         </div>
       </div>

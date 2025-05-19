@@ -1,185 +1,355 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, PieChart, CalendarDays, Building, Users, Shield, BoxIcon, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowUpIcon, ArrowDownIcon, Building, Users, ShieldCheck, Clock, AlertTriangle, HeadsetHelp } from "lucide-react";
 
 const SuperAdminDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-        <h1 className="text-2xl font-semibold">Super Admin Dashboard</h1>
-        <div className="flex items-center space-x-4">
-          <select
-            className="border border-gray-200 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-hrms-primary/20 text-sm"
-          >
-            <option value="today">Today</option>
-            <option value="this_week">This Week</option>
-            <option value="this_month" selected>This Month</option>
-            <option value="this_year">This Year</option>
-          </select>
-          <button className="hrms-button-primary">
-            Platform Report
-          </button>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Platform Overview</h1>
+        <p className="text-muted-foreground">
+          Welcome to the Super Admin Dashboard - Monitor and manage the entire platform
+        </p>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Companies</p>
-                <h3 className="text-2xl font-bold">24</h3>
-                <p className="text-xs text-green-600 mt-1">↑ 4 new this month</p>
-              </div>
-              <div className="h-12 w-12 bg-hrms-light rounded-full flex items-center justify-center">
-                <Building className="h-6 w-6 text-hrms-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active Users</p>
-                <h3 className="text-2xl font-bold">15,240</h3>
-                <p className="text-xs text-green-600 mt-1">↑ 12% from last month</p>
-              </div>
-              <div className="h-12 w-12 bg-hrms-light rounded-full flex items-center justify-center">
-                <Users className="h-6 w-6 text-hrms-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Security Alerts</p>
-                <h3 className="text-2xl font-bold">7</h3>
-                <p className="text-xs text-red-600 mt-1">↑ 3 new alerts</p>
-              </div>
-              <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
-                <Shield className="h-6 w-6 text-red-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Support Tickets</p>
-                <h3 className="text-2xl font-bold">32</h3>
-                <p className="text-xs text-amber-600 mt-1">↓ 5% from last week</p>
-              </div>
-              <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
-                <AlertCircle className="h-6 w-6 text-amber-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Clients Distribution */}
-        <Card className="col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-medium">Client Distribution</CardTitle>
+      {/* Summary cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Companies</CardTitle>
+            <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="h-80 border border-dashed border-gray-200 rounded-md flex items-center justify-center">
-              <BarChart size={48} className="text-muted-foreground opacity-50" />
-              <p className="ml-2 text-muted-foreground">Client Distribution Chart</p>
-            </div>
+            <div className="text-2xl font-bold">248</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-500 flex items-center">
+                <ArrowUpIcon className="h-3 w-3 mr-1" /> +5.3%
+              </span> from last month
+            </p>
           </CardContent>
         </Card>
-
-        {/* Subscription Status */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-medium">Subscription Status</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="h-80 border border-dashed border-gray-200 rounded-md flex items-center justify-center">
-              <PieChart size={48} className="text-muted-foreground opacity-50" />
-              <p className="ml-2 text-muted-foreground">Subscription Status Chart</p>
-            </div>
+            <div className="text-2xl font-bold">18,492</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-500 flex items-center">
+                <ArrowUpIcon className="h-3 w-3 mr-1" /> +8.2%
+              </span> from last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Uptime</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">99.98%</div>
+            <p className="text-xs text-muted-foreground">
+              Last 30 days
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Tickets</CardTitle>
+            <HeadsetHelp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">13</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-red-500 flex items-center">
+                <ArrowUpIcon className="h-3 w-3 mr-1" /> +4
+              </span> from last week
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Companies */}
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <Card className="md:col-span-2 lg:col-span-3">
           <CardHeader>
-            <CardTitle className="text-lg font-medium">Recent Companies</CardTitle>
+            <CardTitle>Quick Access</CardTitle>
+            <CardDescription>Frequently used management areas</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <Link to="/organization/companies">
+              <Button variant="outline" className="w-full justify-start">
+                <Building className="mr-2 h-4 w-4" />
+                Companies
+              </Button>
+            </Link>
+            <Link to="/organization/users">
+              <Button variant="outline" className="w-full justify-start">
+                <Users className="mr-2 h-4 w-4" />
+                Users
+              </Button>
+            </Link>
+            <Link to="/security">
+              <Button variant="outline" className="w-full justify-start">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Security
+              </Button>
+            </Link>
+            <Link to="/support">
+              <Button variant="outline" className="w-full justify-start">
+                <HeadsetHelp className="mr-2 h-4 w-4" />
+                Support
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+        <Card className="md:col-span-1 lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Security Alerts</CardTitle>
+            <CardDescription>Recent security events requiring attention</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { name: "TechCorp Solutions", plan: "Enterprise", users: 230, status: "active" },
-                { name: "GreenLeaf Industries", plan: "Business", users: 85, status: "active" },
-                { name: "Blue Ocean Consulting", plan: "Professional", users: 45, status: "trial" },
-                { name: "RedRock Technologies", plan: "Business", users: 120, status: "active" },
-                { name: "Silverline Services", plan: "Professional", users: 30, status: "pending" },
-              ].map((company, index) => (
-                <div key={index} className="flex items-center justify-between pb-4 border-b last:border-b-0 last:pb-0">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-md bg-hrms-light flex items-center justify-center text-hrms-primary font-bold mr-3">
-                      {company.name.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{company.name}</p>
-                      <p className="text-xs text-muted-foreground">{company.plan} • {company.users} users</p>
-                    </div>
-                  </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    company.status === 'active' ? 'bg-green-100 text-green-700' : 
-                    company.status === 'trial' ? 'bg-blue-100 text-blue-700' : 
-                    'bg-amber-100 text-amber-700'
-                  }`}>
-                    {company.status.charAt(0).toUpperCase() + company.status.slice(1)}
-                  </span>
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 mr-2 text-amber-500" />
+                <div>
+                  <p className="text-sm font-medium">Multiple failed login attempts</p>
+                  <p className="text-xs text-muted-foreground">5 attempts for user admin@acme.com</p>
+                  <p className="text-xs text-muted-foreground">10 minutes ago</p>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">System Activities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { action: "New company registered", user: "System", time: "5 minutes ago" },
-                { action: "Security patch deployed", user: "Admin Bot", time: "2 hours ago" },
-                { action: "Database backup completed", user: "System", time: "5 hours ago" },
-                { action: "New feature released", user: "Release Manager", time: "1 day ago" },
-                { action: "Platform maintenance", user: "System Admin", time: "2 days ago" },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3 pb-4 border-b last:border-b-0 last:pb-0">
-                  <div className="w-8 h-8 rounded-full bg-hrms-light flex items-center justify-center text-hrms-primary flex-shrink-0 mt-1">
-                    <BoxIcon className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">{activity.user} • {activity.time}</p>
-                  </div>
+              </div>
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 mr-2 text-amber-500" />
+                <div>
+                  <p className="text-sm font-medium">Unusual login location</p>
+                  <p className="text-xs text-muted-foreground">user.smith@globex.com logged in from new location</p>
+                  <p className="text-xs text-muted-foreground">2 hours ago</p>
                 </div>
-              ))}
+              </div>
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 mr-2 text-amber-500" />
+                <div>
+                  <p className="text-sm font-medium">Admin role assigned</p>
+                  <p className="text-xs text-muted-foreground">New admin role for dave@wayne.co</p>
+                  <p className="text-xs text-muted-foreground">Yesterday at 14:20</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full mt-2">
+                View All Alerts
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <Tabs defaultValue="companies">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="companies">Companies</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="system">System</TabsTrigger>
+        </TabsList>
+        <TabsContent value="companies" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Companies</CardTitle>
+              <CardDescription>
+                Recently added companies to the platform
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 text-sm font-medium text-muted-foreground">
+                  <div>Company</div>
+                  <div>Industry</div>
+                  <div>Added</div>
+                </div>
+                <div className="divide-y">
+                  <div className="grid grid-cols-3 py-2">
+                    <div>TechStream Inc.</div>
+                    <div>Technology</div>
+                    <div>2 days ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Green Fields Ltd.</div>
+                    <div>Agriculture</div>
+                    <div>3 days ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Quantum Analytics</div>
+                    <div>Finance</div>
+                    <div>5 days ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>BlueSky Airlines</div>
+                    <div>Transport</div>
+                    <div>1 week ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>MediPro Health</div>
+                    <div>Healthcare</div>
+                    <div>1 week ago</div>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+                  <Link to="/organization/companies">View All Companies</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="users" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Users</CardTitle>
+              <CardDescription>
+                Recently registered users
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 text-sm font-medium text-muted-foreground">
+                  <div>User</div>
+                  <div>Role</div>
+                  <div>Company</div>
+                </div>
+                <div className="divide-y">
+                  <div className="grid grid-cols-3 py-2">
+                    <div>John Doe</div>
+                    <div>Admin</div>
+                    <div>TechStream Inc.</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Sarah Miller</div>
+                    <div>HR</div>
+                    <div>Green Fields Ltd.</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Robert Johnson</div>
+                    <div>Manager</div>
+                    <div>Quantum Analytics</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Emily Clark</div>
+                    <div>Employee</div>
+                    <div>BlueSky Airlines</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Michael Brown</div>
+                    <div>Admin</div>
+                    <div>MediPro Health</div>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+                  <Link to="/organization/users">View All Users</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="activity" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>
+                Recent platform activity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 text-sm font-medium text-muted-foreground">
+                  <div>Activity</div>
+                  <div>User</div>
+                  <div>Time</div>
+                </div>
+                <div className="divide-y">
+                  <div className="grid grid-cols-3 py-2">
+                    <div>User Login</div>
+                    <div>admin@techstream.com</div>
+                    <div>10 minutes ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Password Changed</div>
+                    <div>hr@greenfields.com</div>
+                    <div>1 hour ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Role Updated</div>
+                    <div>robert@quantum.com</div>
+                    <div>2 hours ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>User Created</div>
+                    <div>emily@bluesky.com</div>
+                    <div>3 hours ago</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Company Settings Updated</div>
+                    <div>admin@medipro.com</div>
+                    <div>5 hours ago</div>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full mt-2">
+                  View All Activity
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="system" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>System Health</CardTitle>
+              <CardDescription>
+                Current system status and health
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 text-sm font-medium text-muted-foreground">
+                  <div>Service</div>
+                  <div>Status</div>
+                  <div>Response Time</div>
+                </div>
+                <div className="divide-y">
+                  <div className="grid grid-cols-3 py-2">
+                    <div>API Server</div>
+                    <div className="text-green-500">Operational</div>
+                    <div>235ms</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Database</div>
+                    <div className="text-green-500">Operational</div>
+                    <div>178ms</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>File Storage</div>
+                    <div className="text-green-500">Operational</div>
+                    <div>312ms</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Email Service</div>
+                    <div className="text-green-500">Operational</div>
+                    <div>420ms</div>
+                  </div>
+                  <div className="grid grid-cols-3 py-2">
+                    <div>Authentication</div>
+                    <div className="text-green-500">Operational</div>
+                    <div>195ms</div>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full mt-2">
+                  View System Status
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

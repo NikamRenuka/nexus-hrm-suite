@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,8 @@ import LeaveManagement from "./pages/LeaveManagement";
 import PayrollManagement from "./pages/PayrollManagement";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
+import SuperAdminLayout from "./components/layout/SuperAdminLayout";
+import OrganizationLayout from "./components/layout/OrganizationLayout";
 
 // Super Admin Pages
 import Companies from "./pages/organization/Companies";
@@ -101,10 +102,17 @@ const App = () => (
             <Route path="/leave" element={<LeaveManagement />} />
             <Route path="/payroll" element={<PayrollManagement />} />
             
-            {/* Super Admin Routes */}
-            <Route path="/organization/companies" element={<Companies />} />
-            <Route path="/organization/clients" element={<Clients />} />
-            <Route path="/organization/users" element={<OrganizationUsers />} />
+            {/* Super Admin Dashboard */}
+            <Route path="/super-admin" element={<SuperAdminLayout />} />
+            
+            {/* Organization Management Routes */}
+            <Route path="/organization" element={<OrganizationLayout />}>
+              <Route path="/organization/companies" element={<Companies />} />
+              <Route path="/organization/clients" element={<Clients />} />
+              <Route path="/organization/users" element={<OrganizationUsers />} />
+            </Route>
+            
+            {/* Other Super Admin Routes */}
             <Route path="/security" element={<SecurityDashboard />} />
             <Route path="/applications" element={<ApplicationManagement />} />
             <Route path="/support" element={<SupportServices />} />
