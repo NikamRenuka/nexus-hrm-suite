@@ -2,334 +2,164 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { 
-  BarChart, Bar, 
-  LineChart, Line, 
-  PieChart, Pie, Cell, 
-  ResponsiveContainer, 
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend
-} from 'recharts';
-import { BarChart3, PieChart as PieChartIcon, LineChart as LineChartIcon, Download } from 'lucide-react';
+import { BarChart, PieChart, LineChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Pie, Cell, Line } from 'recharts';
+
+// Mock data for charts
+const userRoleData = [
+  { name: 'Admin', value: 24 },
+  { name: 'HR', value: 38 },
+  { name: 'Manager', value: 56 },
+  { name: 'Employee', value: 215 }
+];
+
+const companySubscriptionData = [
+  { name: 'Professional', value: 48 },
+  { name: 'Business', value: 35 },
+  { name: 'Enterprise', value: 17 }
+];
+
+const monthlySignupData = [
+  { name: 'Jan', value: 12 },
+  { name: 'Feb', value: 19 },
+  { name: 'Mar', value: 14 },
+  { name: 'Apr', value: 22 },
+  { name: 'May', value: 35 },
+  { name: 'Jun', value: 28 },
+  { name: 'Jul', value: 32 },
+  { name: 'Aug', value: 27 },
+  { name: 'Sep', value: 42 },
+  { name: 'Oct', value: 39 },
+  { name: 'Nov', value: 26 },
+  { name: 'Dec', value: 31 }
+];
+
+const industryDistributionData = [
+  { name: 'Technology', value: 35 },
+  { name: 'Manufacturing', value: 19 },
+  { name: 'Healthcare', value: 22 },
+  { name: 'Finance', value: 14 },
+  { name: 'Retail', value: 18 },
+  { name: 'Other', value: 12 }
+];
+
+const activityData = [
+  { month: 'Jan', logins: 450, actions: 280, tickets: 12 },
+  { month: 'Feb', logins: 520, actions: 310, tickets: 8 },
+  { month: 'Mar', logins: 490, actions: 290, tickets: 15 },
+  { month: 'Apr', logins: 580, actions: 350, tickets: 10 },
+  { month: 'May', logins: 620, actions: 380, tickets: 18 },
+  { month: 'Jun', logins: 590, actions: 360, tickets: 21 },
+  { month: 'Jul', logins: 610, actions: 370, tickets: 17 },
+  { month: 'Aug', logins: 640, actions: 400, tickets: 14 },
+  { month: 'Sep', logins: 680, actions: 430, tickets: 9 },
+  { month: 'Oct', logins: 710, actions: 450, tickets: 11 },
+  { month: 'Nov', logins: 650, actions: 410, tickets: 13 },
+  { month: 'Dec', logins: 690, actions: 440, tickets: 16 }
+];
+
+// Colors for charts
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#9b87f5'];
 
 const SuperAdminReports: React.FC = () => {
-  const [timeRange, setTimeRange] = useState('month');
-  
-  // Mock data for the charts
-  const usersByCompanyData = [
-    { name: 'Acme Corp', users: 245 },
-    { name: 'Globex', users: 187 },
-    { name: 'Stark Inc', users: 128 },
-    { name: 'Wayne Ent', users: 95 },
-    { name: 'Umbrella', users: 76 }
-  ];
-
-  const userRolesData = [
-    { name: 'Employees', value: 1850 },
-    { name: 'Managers', value: 420 },
-    { name: 'HR', value: 180 },
-    { name: 'Admins', value: 95 },
-    { name: 'Super Admins', value: 12 }
-  ];
-  
-  const growthData = [
-    { month: 'Jan', companies: 145, users: 1850 },
-    { month: 'Feb', companies: 152, users: 1950 },
-    { month: 'Mar', companies: 165, users: 2120 },
-    { month: 'Apr', companies: 172, users: 2250 },
-    { month: 'May', companies: 184, users: 2390 },
-    { month: 'Jun', companies: 200, users: 2520 },
-    { month: 'Jul', companies: 220, users: 2600 },
-    { month: 'Aug', companies: 232, users: 2680 },
-    { month: 'Sep', companies: 248, users: 2750 }
-  ];
-
-  const securityAlertsData = [
-    { name: 'Failed Logins', value: 28 },
-    { name: 'New Location Logins', value: 15 },
-    { name: 'Admin Role Changes', value: 7 },
-    { name: 'Password Resets', value: 32 }
-  ];
-
-  const supportTicketsData = [
-    { month: 'Jan', open: 23, resolved: 20 },
-    { month: 'Feb', open: 28, resolved: 25 },
-    { month: 'Mar', open: 20, resolved: 18 },
-    { month: 'Apr', open: 27, resolved: 24 },
-    { month: 'May', open: 18, resolved: 15 },
-    { month: 'Jun', open: 24, resolved: 22 },
-    { month: 'Jul', open: 15, resolved: 13 },
-    { month: 'Aug', open: 19, resolved: 17 },
-    { month: 'Sep', open: 16, resolved: 13 }
-  ];
-  
-  const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088fe'];
-
-  const pieChartConfig = {
-    'Employees': { color: '#8884d8' },
-    'Managers': { color: '#82ca9d' },
-    'HR': { color: '#ffc658' },
-    'Admins': { color: '#ff8042' },
-    'Super Admins': { color: '#0088fe' },
-  };
+  const [activeTab, setActiveTab] = useState('overview');
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Platform Reports</h1>
-          <p className="text-muted-foreground">
-            Comprehensive analytics and statistics across the entire platform.
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Time Range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">Last 7 days</SelectItem>
-              <SelectItem value="month">Last 30 days</SelectItem>
-              <SelectItem value="quarter">Last 3 months</SelectItem>
-              <SelectItem value="year">Last 12 months</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="icon">
-            <Download className="h-4 w-4" />
-          </Button>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Platform Reports</h1>
+        <p className="text-muted-foreground">
+          Comprehensive analytics and reports for the entire platform
+        </p>
       </div>
 
-      <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="overview" onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="users">Users & Companies</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="support">Support</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="companies">Companies</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-6 mt-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Companies
-                </CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>User Role Distribution</CardTitle>
+                <CardDescription>Breakdown of users by role across the platform</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">248</div>
-                <p className="text-xs text-muted-foreground">+12% from last month</p>
-                <div className="h-[80px] mt-4">
+              <CardContent className="pt-2">
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={growthData.slice(-5)} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                      <Bar dataKey="companies" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Users
-                </CardTitle>
-                <LineChartIcon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">2,557</div>
-                <p className="text-xs text-muted-foreground">+4.5% from last month</p>
-                <div className="h-[80px] mt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={growthData.slice(-5)} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                      <Line type="monotone" dataKey="users" stroke="#82ca9d" strokeWidth={2} dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  User Roles Distribution
-                </CardTitle>
-                <PieChartIcon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-[120px]">
-                  <ChartContainer
-                    config={pieChartConfig}
-                    className="h-[120px]"
-                  >
                     <PieChart>
                       <Pie
-                        data={userRolesData}
+                        data={userRoleData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={25}
-                        outerRadius={50}
-                        paddingAngle={2}
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
                         dataKey="value"
-                        label={false}
                       >
-                        {userRolesData.map((entry, index) => (
+                        {userRoleData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <ChartTooltip
-                        content={<ChartTooltipContent />}
-                      />
+                      <Tooltip />
+                      <Legend />
                     </PieChart>
-                  </ChartContainer>
+                  </ResponsiveContainer>
                 </div>
-                <div className="flex justify-center space-x-4 text-xs mt-2">
-                  {userRolesData.map((entry, index) => (
-                    <div key={`legend-${index}`} className="flex items-center">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-1"
-                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                      ></div>
-                      {entry.name}
-                    </div>
-                  ))}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Company Subscriptions</CardTitle>
+                <CardDescription>Distribution of subscription types</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={companySubscriptionData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {companySubscriptionData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
           </div>
           
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Platform Growth</CardTitle>
-                <CardDescription>Companies and users growth over time</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={growthData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip />
-                      <Legend />
-                      <Line yAxisId="left" type="monotone" dataKey="companies" stroke="#8884d8" activeDot={{ r: 8 }} />
-                      <Line yAxisId="right" type="monotone" dataKey="users" stroke="#82ca9d" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Support Tickets</CardTitle>
-                <CardDescription>Open vs resolved tickets per month</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={supportTicketsData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="open" fill="#8884d8" />
-                      <Bar dataKey="resolved" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="users" className="space-y-6 mt-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Users by Company</CardTitle>
-                <CardDescription>Distribution of users across top companies</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={usersByCompanyData}
-                      layout="vertical"
-                      margin={{ top: 20, right: 30, left: 60, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis dataKey="name" type="category" />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="users" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>User Role Distribution</CardTitle>
-                <CardDescription>Breakdown of users by their roles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px] flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={userRolesData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={true}
-                        outerRadius={130}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {userRolesData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => [`${value} users`, 'Count']} />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="security" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Security Alerts</CardTitle>
-              <CardDescription>Distribution of security incidents by type</CardDescription>
+              <CardTitle>Monthly Company Sign-ups</CardTitle>
+              <CardDescription>New companies joining the platform over the past year</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
+            <CardContent className="pt-2">
+              <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={securityAlertsData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                  >
+                  <BarChart data={monthlySignupData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" fill="#ff8042" name="Count" />
+                    <Bar dataKey="value" name="Companies" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -337,27 +167,145 @@ const SuperAdminReports: React.FC = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="support" className="space-y-6 mt-6">
+        <TabsContent value="users" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Support Ticket Trends</CardTitle>
-              <CardDescription>Open vs resolved tickets over time</CardDescription>
+              <CardTitle>User Role Analysis</CardTitle>
+              <CardDescription>Detailed breakdown of platform users by role</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px]">
+              <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={supportTicketsData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                  >
+                  <BarChart data={userRoleData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={80} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" name="Users" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>User Activity Timeline</CardTitle>
+              <CardDescription>User engagement metrics over time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={activityData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="open" stroke="#8884d8" activeDot={{ r: 8 }} />
-                    <Line type="monotone" dataKey="resolved" stroke="#82ca9d" />
+                    <Line type="monotone" dataKey="logins" name="Logins" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="actions" name="Actions" stroke="#82ca9d" />
                   </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="companies" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Industry Distribution</CardTitle>
+              <CardDescription>Companies categorized by industry type</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={industryDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {industryDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Subscription Analysis</CardTitle>
+              <CardDescription>Detailed view of subscription plans</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={companySubscriptionData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" name="Companies" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="activity" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Platform Activity</CardTitle>
+              <CardDescription>Comprehensive view of user interactions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={activityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="logins" name="Logins" stroke="#8884d8" />
+                    <Line type="monotone" dataKey="actions" name="Actions" stroke="#82ca9d" />
+                    <Line type="monotone" dataKey="tickets" name="Support Tickets" stroke="#ffc658" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Support Ticket Analysis</CardTitle>
+              <CardDescription>Monthly support ticket volumes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={activityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="tickets" name="Support Tickets" fill="#ff8042" />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>

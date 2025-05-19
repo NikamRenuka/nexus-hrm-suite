@@ -1,810 +1,762 @@
 
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { 
-  Globe, 
-  Shield, 
-  Bell, 
-  Mail, 
-  Database, 
-  Server, 
-  CreditCard, 
-  RefreshCcw, 
-  Save 
-} from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
+import {
+  AlertCircle,
+  CheckCircle,
+  Save,
+  Send,
+  Shield,
+  Building,
+  Mail,
+  CreditCard,
+  Database,
+  Settings,
+  Lock,
+} from 'lucide-react';
 
-const generalSettingsSchema = z.object({
-  platformName: z.string().min(2, { message: "Platform name is required" }),
-  companyName: z.string().min(2, { message: "Company name is required" }),
-  supportEmail: z.string().email({ message: "Invalid email address" }),
-  contactPhone: z.string().optional(),
-  favicon: z.string().optional(),
-  logo: z.string().optional(),
-});
-
-const securitySettingsSchema = z.object({
-  passwordPolicy: z.enum(['low', 'medium', 'high', 'custom']),
-  minPasswordLength: z.number().int().min(6),
-  requireSpecialChars: z.boolean(),
-  requireNumbers: z.boolean(),
-  requireUppercase: z.boolean(),
-  mfaEnabled: z.boolean(),
-  sessionTimeout: z.number().int().min(5),
-  maxLoginAttempts: z.number().int().min(3).max(10),
-});
-
-const emailSettingsSchema = z.object({
-  smtpServer: z.string().min(2, { message: "SMTP server is required" }),
-  smtpPort: z.number().int().min(1).max(65535),
-  smtpUsername: z.string().min(2, { message: "SMTP username is required" }),
-  smtpPassword: z.string().min(1, { message: "SMTP password is required" }),
-  senderEmail: z.string().email({ message: "Invalid sender email" }),
-  senderName: z.string().min(2, { message: "Sender name is required" }),
-  enableSSL: z.boolean(),
-});
+interface SettingCategory {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+}
 
 const SuperAdminSettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('general');
+  // Define setting categories
+  const categories: SettingCategory[] = [
+    { id: 'general', name: 'General', icon: <Settings className="h-4 w-4 mr-2" /> },
+    { id: 'security', name: 'Security', icon: <Shield className="h-4 w-4 mr-2" /> },
+    { id: 'email', name: 'Email', icon: <Mail className="h-4 w-4 mr-2" /> },
+    { id: 'company', name: 'Company', icon: <Building className="h-4 w-4 mr-2" /> },
+    { id: 'database', name: 'Database', icon: <Database className="h-4 w-4 mr-2" /> },
+    { id: 'billing', name: 'Billing', icon: <CreditCard className="h-4 w-4 mr-2" /> },
+  ];
 
-  // General Settings Form
-  const generalForm = useForm<z.infer<typeof generalSettingsSchema>>({
-    resolver: zodResolver(generalSettingsSchema),
-    defaultValues: {
-      platformName: 'HR Management System',
-      companyName: 'Tech Solutions Inc.',
-      supportEmail: 'support@hrsystem.com',
-      contactPhone: '+1 (555) 123-4567',
-      favicon: '',
-      logo: '',
-    },
+  // State for general settings
+  const [generalSettings, setGeneralSettings] = useState({
+    platformName: 'HR Management System',
+    supportEmail: 'support@hrsystem.com',
+    contactPhone: '+1 (555) 123-4567',
+    logoUrl: '',
+    faviconUrl: '',
   });
 
-  const onGeneralSubmit = (data: z.infer<typeof generalSettingsSchema>) => {
-    toast({
-      title: "General settings updated",
-      description: "Your general settings have been saved successfully.",
-    });
-    console.log('General Settings:', data);
-  };
-
-  // Security Settings Form
-  const securityForm = useForm<z.infer<typeof securitySettingsSchema>>({
-    resolver: zodResolver(securitySettingsSchema),
-    defaultValues: {
-      passwordPolicy: 'medium',
-      minPasswordLength: 8,
-      requireSpecialChars: true,
-      requireNumbers: true,
-      requireUppercase: true,
-      mfaEnabled: false,
-      sessionTimeout: 30,
-      maxLoginAttempts: 5,
-    },
+  // State for security settings
+  const [securitySettings, setSecuritySettings] = useState({
+    passwordPolicy: 'medium',
+    minPasswordLength: 8,
+    requireSpecialChars: true,
+    requireNumbers: true,
+    requireUppercase: true,
+    mfaEnabled: false,
+    sessionTimeout: 30,
+    maxLoginAttempts: 5,
   });
 
-  const onSecuritySubmit = (data: z.infer<typeof securitySettingsSchema>) => {
-    toast({
-      title: "Security settings updated",
-      description: "Your security settings have been saved successfully.",
-    });
-    console.log('Security Settings:', data);
-  };
-
-  // Email Settings Form
-  const emailForm = useForm<z.infer<typeof emailSettingsSchema>>({
-    resolver: zodResolver(emailSettingsSchema),
-    defaultValues: {
-      smtpServer: 'smtp.example.com',
-      smtpPort: 587,
-      smtpUsername: 'notifications@example.com',
-      smtpPassword: '••••••••••••',
-      senderEmail: 'notifications@example.com',
-      senderName: 'HR System Notifications',
-      enableSSL: true,
-    },
+  // State for email settings
+  const [emailSettings, setEmailSettings] = useState({
+    smtpServer: 'smtp.example.com',
+    smtpPort: 587,
+    smtpUsername: 'notifications@hrsystem.com',
+    smtpPassword: '********',
+    senderEmail: 'noreply@hrsystem.com',
+    senderName: 'HR System Notifications',
+    enableSSL: true,
   });
 
-  const onEmailSubmit = (data: z.infer<typeof emailSettingsSchema>) => {
+  // State for email test
+  const [emailTestStatus, setEmailTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+
+  // State for company settings
+  const [companySettings, setCompanySettings] = useState({
+    defaultTimezone: 'UTC',
+    dateFormat: 'MM/DD/YYYY',
+    timeFormat: '12h',
+    defaultLanguage: 'en-US',
+    weekStartsOn: 'monday',
+  });
+
+  // State for database settings
+  const [databaseSettings, setDatabaseSettings] = useState({
+    backupFrequency: 'daily',
+    backupRetentionDays: 30,
+    dbHost: 'db.example.com',
+    dbName: 'hrms_production',
+    autoVacuum: true,
+    logQueries: false,
+  });
+
+  // State for billing settings
+  const [billingSettings, setBillingSettings] = useState({
+    billingCycle: 'monthly',
+    currencyCode: 'USD',
+    taxRate: 0,
+    invoicePrefix: 'INV-',
+    gracePaymentDays: 7,
+    autoSuspend: true,
+  });
+
+  // Save settings handler
+  const handleSaveSettings = (settingType: string) => {
+    // In a real application, this would call an API to save settings
     toast({
-      title: "Email settings updated",
-      description: "Your email settings have been saved successfully.",
+      title: 'Settings saved',
+      description: `${settingType} settings have been updated successfully.`,
     });
-    console.log('Email Settings:', data);
   };
 
-  // Test Email Function
+  // Test email configuration
   const handleTestEmail = () => {
-    toast({
-      title: "Test email sent",
-      description: "A test email has been sent to the configured address.",
-    });
+    setEmailTestStatus('testing');
+    
+    // Simulate API call
+    setTimeout(() => {
+      const success = Math.random() > 0.3; // 70% success rate for demo
+      
+      if (success) {
+        setEmailTestStatus('success');
+        toast({
+          title: 'Email test successful',
+          description: 'The test email was sent successfully.'
+        });
+      } else {
+        setEmailTestStatus('error');
+        toast({
+          title: 'Email test failed',
+          description: 'Could not send test email. Please check your configuration.',
+          variant: 'destructive'
+        });
+      }
+      
+      // Reset status after 3 seconds
+      setTimeout(() => {
+        setEmailTestStatus('idle');
+      }, 3000);
+    }, 2000);
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Platform Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
         <p className="text-muted-foreground">
-          Manage global settings and configurations for the entire platform.
+          Configure platform-wide settings and parameters
         </p>
       </div>
 
-      <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-5 sm:grid-cols-5">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="email">Email</TabsTrigger>
-          <TabsTrigger value="database">Database</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
+      <Tabs defaultValue="general" className="space-y-4">
+        <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          {categories.map(category => (
+            <TabsTrigger key={category.id} value={category.id} className="flex items-center">
+              {category.icon}
+              <span>{category.name}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
-        
+
         {/* General Settings */}
-        <TabsContent value="general" className="space-y-4">
+        <TabsContent value="general">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Globe className="mr-2 h-5 w-5" />
-                General Settings
-              </CardTitle>
+              <CardTitle>General Settings</CardTitle>
               <CardDescription>
-                Configure basic platform information and branding.
+                Basic configuration settings for the platform
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Form {...generalForm}>
-                <form id="generalSettingsForm" onSubmit={generalForm.handleSubmit(onGeneralSubmit)} className="space-y-4">
-                  <FormField
-                    control={generalForm.control}
-                    name="platformName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Platform Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          The name displayed throughout the platform.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="platformName">Platform Name</Label>
+                  <Input 
+                    id="platformName" 
+                    value={generalSettings.platformName}
+                    onChange={(e) => setGeneralSettings({...generalSettings, platformName: e.target.value})} 
                   />
-                  
-                  <FormField
-                    control={generalForm.control}
-                    name="companyName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          The name of your organization.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  <p className="text-sm text-muted-foreground">The name of the platform shown throughout the application</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="supportEmail">Support Email</Label>
+                  <Input 
+                    id="supportEmail" 
+                    type="email" 
+                    value={generalSettings.supportEmail}
+                    onChange={(e) => setGeneralSettings({...generalSettings, supportEmail: e.target.value})} 
                   />
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={generalForm.control}
-                      name="supportEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Support Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={generalForm.control}
-                      name="contactPhone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Contact Phone</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <Separator className="my-4" />
-                  <h3 className="text-lg font-medium">Branding</h3>
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={generalForm.control}
-                      name="logo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Logo URL</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="https://example.com/logo.png" />
-                          </FormControl>
-                          <FormDescription>
-                            URL to your company logo (recommended size: 180x40px)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={generalForm.control}
-                      name="favicon"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Favicon URL</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="https://example.com/favicon.ico" />
-                          </FormControl>
-                          <FormDescription>
-                            URL to your favicon (recommended size: 32x32px)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </form>
-              </Form>
+                  <p className="text-sm text-muted-foreground">Email address for support inquiries</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contactPhone">Contact Phone</Label>
+                  <Input 
+                    id="contactPhone" 
+                    value={generalSettings.contactPhone}
+                    onChange={(e) => setGeneralSettings({...generalSettings, contactPhone: e.target.value})} 
+                  />
+                  <p className="text-sm text-muted-foreground">Support phone number</p>
+                </div>
+              </div>
+
+              <Separator className="my-4" />
+
+              <h3 className="text-lg font-medium">Branding</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="logoUrl">Logo URL</Label>
+                  <Input 
+                    id="logoUrl" 
+                    value={generalSettings.logoUrl}
+                    onChange={(e) => setGeneralSettings({...generalSettings, logoUrl: e.target.value})} 
+                    placeholder="https://example.com/logo.png" 
+                  />
+                  <p className="text-sm text-muted-foreground">URL to your platform logo</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="faviconUrl">Favicon URL</Label>
+                  <Input 
+                    id="faviconUrl" 
+                    value={generalSettings.faviconUrl}
+                    onChange={(e) => setGeneralSettings({...generalSettings, faviconUrl: e.target.value})}
+                    placeholder="https://example.com/favicon.ico" 
+                  />
+                  <p className="text-sm text-muted-foreground">URL to your platform favicon</p>
+                </div>
+              </div>
             </CardContent>
-            <CardFooter className="border-t px-6 py-4">
-              <Button type="submit" form="generalSettingsForm" className="ml-auto">
-                <Save className="mr-2 h-4 w-4" />
+            <CardFooter className="flex justify-end">
+              <Button onClick={() => handleSaveSettings('General')}>
+                <Save className="h-4 w-4 mr-2" />
                 Save Changes
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
-        
+
         {/* Security Settings */}
-        <TabsContent value="security" className="space-y-4">
+        <TabsContent value="security">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Shield className="mr-2 h-5 w-5" />
-                Security Settings
-              </CardTitle>
+              <CardTitle>Security Settings</CardTitle>
               <CardDescription>
-                Configure security policies and authentication settings.
+                Configure security policies and authentication settings
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Form {...securityForm}>
-                <form id="securitySettingsForm" onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-4">
-                  <FormField
-                    control={securityForm.control}
-                    name="passwordPolicy"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password Policy</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a policy" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="low">Low Security</SelectItem>
-                            <SelectItem value="medium">Medium Security</SelectItem>
-                            <SelectItem value="high">High Security</SelectItem>
-                            <SelectItem value="custom">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Choose a predefined policy or customize your own.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={securityForm.control}
-                      name="minPasswordLength"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Minimum Password Length</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              {...field}
-                              onChange={e => field.onChange(parseInt(e.target.value))} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={securityForm.control}
-                      name="maxLoginAttempts"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Max Failed Login Attempts</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              {...field}
-                              onChange={e => field.onChange(parseInt(e.target.value))} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Password Policy</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="passwordPolicy">Password Complexity</Label>
+                    <select 
+                      id="passwordPolicy"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={securitySettings.passwordPolicy}
+                      onChange={(e) => setSecuritySettings({...securitySettings, passwordPolicy: e.target.value})}
+                    >
+                      <option value="low">Low (Letters only)</option>
+                      <option value="medium">Medium (Letters + Numbers)</option>
+                      <option value="high">High (Letters + Numbers + Special)</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="minPasswordLength">Minimum Password Length</Label>
+                    <Input 
+                      id="minPasswordLength" 
+                      type="number"
+                      min="6"
+                      max="32" 
+                      value={securitySettings.minPasswordLength}
+                      onChange={(e) => setSecuritySettings({...securitySettings, minPasswordLength: parseInt(e.target.value)})}
                     />
                   </div>
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <FormField
-                      control={securityForm.control}
-                      name="requireSpecialChars"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between space-x-2 space-y-0 rounded-md border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel>Special Characters</FormLabel>
-                            <FormDescription>
-                              Require special characters in passwords
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="requireSpecialChars" 
+                      checked={securitySettings.requireSpecialChars}
+                      onCheckedChange={(checked) => setSecuritySettings({...securitySettings, requireSpecialChars: checked})}
                     />
-                    
-                    <FormField
-                      control={securityForm.control}
-                      name="requireNumbers"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between space-x-2 space-y-0 rounded-md border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel>Numbers</FormLabel>
-                            <FormDescription>
-                              Require numbers in passwords
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
+                    <Label htmlFor="requireSpecialChars">Require Special Characters</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="requireNumbers" 
+                      checked={securitySettings.requireNumbers}
+                      onCheckedChange={(checked) => setSecuritySettings({...securitySettings, requireNumbers: checked})}
                     />
-                    
-                    <FormField
-                      control={securityForm.control}
-                      name="requireUppercase"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between space-x-2 space-y-0 rounded-md border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel>Uppercase</FormLabel>
-                            <FormDescription>
-                              Require uppercase letters in passwords
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
+                    <Label htmlFor="requireNumbers">Require Numbers</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="requireUppercase" 
+                      checked={securitySettings.requireUppercase}
+                      onCheckedChange={(checked) => setSecuritySettings({...securitySettings, requireUppercase: checked})}
+                    />
+                    <Label htmlFor="requireUppercase">Require Uppercase Letters</Label>
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                <h3 className="text-lg font-medium">Authentication</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="mfaEnabled">Multi-Factor Authentication</Label>
+                      <Switch 
+                        id="mfaEnabled" 
+                        checked={securitySettings.mfaEnabled}
+                        onCheckedChange={(checked) => setSecuritySettings({...securitySettings, mfaEnabled: checked})}
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">Require users to use 2FA for authentication</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                    <Input 
+                      id="sessionTimeout" 
+                      type="number"
+                      value={securitySettings.sessionTimeout}
+                      onChange={(e) => setSecuritySettings({...securitySettings, sessionTimeout: parseInt(e.target.value)})}
                     />
                   </div>
-                  
-                  <Separator className="my-4" />
-                  
-                  <FormField
-                    control={securityForm.control}
-                    name="mfaEnabled"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between space-x-2 space-y-0 rounded-md border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel>Multi-factor Authentication</FormLabel>
-                          <FormDescription>
-                            Require MFA for all users in the platform
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="maxLoginAttempts">Maximum Login Attempts</Label>
+                  <Input 
+                    id="maxLoginAttempts" 
+                    type="number"
+                    value={securitySettings.maxLoginAttempts}
+                    onChange={(e) => setSecuritySettings({...securitySettings, maxLoginAttempts: parseInt(e.target.value)})}
                   />
-                  
-                  <FormField
-                    control={securityForm.control}
-                    name="sessionTimeout"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Session Timeout (minutes)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field}
-                            onChange={e => field.onChange(parseInt(e.target.value))} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          How long users can remain inactive before being logged out
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </form>
-              </Form>
+                  <p className="text-sm text-muted-foreground">Number of failed login attempts before account lockout</p>
+                </div>
+              </div>
             </CardContent>
-            <CardFooter className="border-t px-6 py-4">
-              <Button type="submit" form="securitySettingsForm" className="ml-auto">
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
+            <CardFooter className="flex justify-end">
+              <Button onClick={() => handleSaveSettings('Security')}>
+                <Lock className="h-4 w-4 mr-2" />
+                Save Security Settings
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
-        
+
         {/* Email Settings */}
-        <TabsContent value="email" className="space-y-4">
+        <TabsContent value="email">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Mail className="mr-2 h-5 w-5" />
-                Email Configuration
-              </CardTitle>
+              <CardTitle>Email Configuration</CardTitle>
               <CardDescription>
-                Configure email server settings for system notifications.
+                Configure email delivery settings for system notifications
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Form {...emailForm}>
-                <form id="emailSettingsForm" onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={emailForm.control}
-                      name="smtpServer"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>SMTP Server</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={emailForm.control}
-                      name="smtpPort"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>SMTP Port</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              {...field}
-                              onChange={e => field.onChange(parseInt(e.target.value))} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={emailForm.control}
-                      name="smtpUsername"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>SMTP Username</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={emailForm.control}
-                      name="smtpPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>SMTP Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={emailForm.control}
-                      name="senderEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Sender Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={emailForm.control}
-                      name="senderName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Sender Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={emailForm.control}
-                    name="enableSSL"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between space-x-2 space-y-0 rounded-md border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel>Enable SSL/TLS</FormLabel>
-                          <FormDescription>
-                            Use secure connection for email sending
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="smtpServer">SMTP Server</Label>
+                  <Input 
+                    id="smtpServer" 
+                    value={emailSettings.smtpServer}
+                    onChange={(e) => setEmailSettings({...emailSettings, smtpServer: e.target.value})}
                   />
-                </form>
-              </Form>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtpPort">SMTP Port</Label>
+                  <Input 
+                    id="smtpPort" 
+                    type="number"
+                    value={emailSettings.smtpPort}
+                    onChange={(e) => setEmailSettings({...emailSettings, smtpPort: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtpUsername">SMTP Username</Label>
+                  <Input 
+                    id="smtpUsername" 
+                    value={emailSettings.smtpUsername}
+                    onChange={(e) => setEmailSettings({...emailSettings, smtpUsername: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtpPassword">SMTP Password</Label>
+                  <Input 
+                    id="smtpPassword" 
+                    type="password"
+                    value={emailSettings.smtpPassword}
+                    onChange={(e) => setEmailSettings({...emailSettings, smtpPassword: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="senderEmail">Sender Email</Label>
+                  <Input 
+                    id="senderEmail" 
+                    type="email"
+                    value={emailSettings.senderEmail}
+                    onChange={(e) => setEmailSettings({...emailSettings, senderEmail: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="senderName">Sender Name</Label>
+                  <Input 
+                    id="senderName"
+                    value={emailSettings.senderName}
+                    onChange={(e) => setEmailSettings({...emailSettings, senderName: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="enableSSL" 
+                  checked={emailSettings.enableSSL}
+                  onCheckedChange={(checked) => setEmailSettings({...emailSettings, enableSSL: checked})}
+                />
+                <Label htmlFor="enableSSL">Enable SSL/TLS</Label>
+              </div>
+
+              <div className="border rounded-md p-4 bg-muted/30">
+                <h4 className="font-medium mb-2">Test Email Configuration</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Send a test email to verify your configuration is working correctly
+                </p>
+                <div className="flex items-center">
+                  <Button 
+                    onClick={handleTestEmail}
+                    disabled={emailTestStatus === 'testing'}
+                    variant="outline"
+                  >
+                    {emailTestStatus === 'testing' ? (
+                      <>Testing...</>
+                    ) : emailTestStatus === 'success' ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                        Test Successful
+                      </>
+                    ) : emailTestStatus === 'error' ? (
+                      <>
+                        <AlertCircle className="h-4 w-4 mr-2 text-red-500" />
+                        Test Failed
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Send Test Email
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </CardContent>
-            <CardFooter className="border-t px-6 py-4 flex justify-between">
-              <Button variant="outline" onClick={handleTestEmail}>
-                <Mail className="mr-2 h-4 w-4" />
-                Send Test Email
-              </Button>
-              <Button type="submit" form="emailSettingsForm">
-                <Save className="mr-2 h-4 w-4" />
-                Save Changes
+            <CardFooter className="flex justify-end">
+              <Button onClick={() => handleSaveSettings('Email')}>
+                <Save className="h-4 w-4 mr-2" />
+                Save Email Settings
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
-        
-        {/* Database Settings */}
-        <TabsContent value="database" className="space-y-4">
+
+        {/* Company Settings */}
+        <TabsContent value="company">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Database className="mr-2 h-5 w-5" />
-                Database Management
-              </CardTitle>
+              <CardTitle>Company Settings</CardTitle>
               <CardDescription>
-                Manage database connections and maintenance tasks.
+                Configure default settings for companies in the platform
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-2">Database Status</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <div className="rounded-md border p-4">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">Connection Status</div>
-                    <div className="flex items-center">
-                      <div className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"></div>
-                      <span className="font-medium">Connected</span>
-                    </div>
-                  </div>
-                  
-                  <div className="rounded-md border p-4">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">Database Size</div>
-                    <div className="font-medium">2.8 GB</div>
-                  </div>
-                  
-                  <div className="rounded-md border p-4">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">Last Backup</div>
-                    <div className="font-medium">Today at 03:00 AM</div>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="defaultTimezone">Default Timezone</Label>
+                  <select 
+                    id="defaultTimezone"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={companySettings.defaultTimezone}
+                    onChange={(e) => setCompanySettings({...companySettings, defaultTimezone: e.target.value})}
+                  >
+                    <option value="UTC">UTC</option>
+                    <option value="America/New_York">Eastern Time (ET)</option>
+                    <option value="America/Chicago">Central Time (CT)</option>
+                    <option value="America/Denver">Mountain Time (MT)</option>
+                    <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                    <option value="Europe/London">London (GMT)</option>
+                    <option value="Europe/Paris">Central European Time (CET)</option>
+                    <option value="Asia/Tokyo">Japan (JST)</option>
+                  </select>
                 </div>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-2">Maintenance</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="rounded-md border p-4 space-y-4">
-                    <div>
-                      <div className="font-medium">Database Backup</div>
-                      <p className="text-sm text-muted-foreground">Create a full backup of the database</p>
-                    </div>
-                    <Button variant="outline">
-                      <Server className="mr-2 h-4 w-4" />
-                      Create Backup
-                    </Button>
-                  </div>
-                  
-                  <div className="rounded-md border p-4 space-y-4">
-                    <div>
-                      <div className="font-medium">Database Optimization</div>
-                      <p className="text-sm text-muted-foreground">Optimize tables and indexes</p>
-                    </div>
-                    <Button variant="outline">
-                      <RefreshCcw className="mr-2 h-4 w-4" />
-                      Optimize Now
-                    </Button>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dateFormat">Date Format</Label>
+                  <select 
+                    id="dateFormat"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={companySettings.dateFormat}
+                    onChange={(e) => setCompanySettings({...companySettings, dateFormat: e.target.value})}
+                  >
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  </select>
                 </div>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-2">Connection Information</h3>
-                <div className="rounded-md border p-4 space-y-2">
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="font-medium">Host</div>
-                    <div className="col-span-2">db.example.com</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="font-medium">Database Name</div>
-                    <div className="col-span-2">hr_system_production</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="font-medium">Engine</div>
-                    <div className="col-span-2">MongoDB 6.0</div>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="timeFormat">Time Format</Label>
+                  <select 
+                    id="timeFormat"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={companySettings.timeFormat}
+                    onChange={(e) => setCompanySettings({...companySettings, timeFormat: e.target.value})}
+                  >
+                    <option value="12h">12 Hour (AM/PM)</option>
+                    <option value="24h">24 Hour</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="defaultLanguage">Default Language</Label>
+                  <select 
+                    id="defaultLanguage"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={companySettings.defaultLanguage}
+                    onChange={(e) => setCompanySettings({...companySettings, defaultLanguage: e.target.value})}
+                  >
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="ja-JP">Japanese</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="weekStartsOn">Week Starts On</Label>
+                  <select 
+                    id="weekStartsOn"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={companySettings.weekStartsOn}
+                    onChange={(e) => setCompanySettings({...companySettings, weekStartsOn: e.target.value})}
+                  >
+                    <option value="sunday">Sunday</option>
+                    <option value="monday">Monday</option>
+                    <option value="saturday">Saturday</option>
+                  </select>
                 </div>
               </div>
             </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button onClick={() => handleSaveSettings('Company')}>
+                <Building className="h-4 w-4 mr-2" />
+                Save Company Settings
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
-        
-        {/* Billing Settings */}
-        <TabsContent value="billing" className="space-y-4">
+
+        {/* Database Settings */}
+        <TabsContent value="database">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <CreditCard className="mr-2 h-5 w-5" />
-                Billing Information
-              </CardTitle>
+              <CardTitle>Database Settings</CardTitle>
               <CardDescription>
-                Manage subscription and payment details.
+                Configure database and backup settings
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-2">Current Subscription</h3>
-                <div className="rounded-md border p-4">
-                  <div className="flex justify-between mb-4">
-                    <div>
-                      <div className="text-xl font-bold">Enterprise Plan</div>
-                      <div className="text-sm text-muted-foreground">Unlimited companies and users</div>
-                    </div>
-                    <Badge>Active</Badge>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="dbHost">Database Host</Label>
+                  <Input 
+                    id="dbHost" 
+                    value={databaseSettings.dbHost}
+                    onChange={(e) => setDatabaseSettings({...databaseSettings, dbHost: e.target.value})}
+                  />
+                  <p className="text-sm text-muted-foreground">Hostname or IP of database server</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dbName">Database Name</Label>
+                  <Input 
+                    id="dbName" 
+                    value={databaseSettings.dbName}
+                    onChange={(e) => setDatabaseSettings({...databaseSettings, dbName: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="backupFrequency">Backup Frequency</Label>
+                  <select 
+                    id="backupFrequency"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={databaseSettings.backupFrequency}
+                    onChange={(e) => setDatabaseSettings({...databaseSettings, backupFrequency: e.target.value})}
+                  >
+                    <option value="hourly">Hourly</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="backupRetentionDays">Backup Retention (days)</Label>
+                  <Input 
+                    id="backupRetentionDays" 
+                    type="number"
+                    value={databaseSettings.backupRetentionDays}
+                    onChange={(e) => setDatabaseSettings({...databaseSettings, backupRetentionDays: parseInt(e.target.value)})}
+                  />
+                  <p className="text-sm text-muted-foreground">Number of days to keep backups</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="autoVacuum" 
+                    checked={databaseSettings.autoVacuum}
+                    onCheckedChange={(checked) => setDatabaseSettings({...databaseSettings, autoVacuum: checked})}
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="autoVacuum">Auto Vacuum</Label>
+                    <p className="text-sm text-muted-foreground">Automatically clean up deleted records</p>
                   </div>
-                  
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-4">
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">Next billing date</div>
-                      <div>June 15, 2023</div>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">Amount</div>
-                      <div>$1,999.00 / month</div>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">Payment method</div>
-                      <div>VISA ending in 4242</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" size="sm">Update Payment Method</Button>
-                    <Button variant="outline" size="sm">View Invoices</Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="logQueries" 
+                    checked={databaseSettings.logQueries}
+                    onCheckedChange={(checked) => setDatabaseSettings({...databaseSettings, logQueries: checked})}
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="logQueries">Log Queries</Label>
+                    <p className="text-sm text-muted-foreground">Log all database queries for debugging</p>
                   </div>
                 </div>
               </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-2">Billing Information</h3>
-                <div className="rounded-md border p-4 space-y-2">
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="font-medium">Company</div>
-                    <div className="col-span-2">Tech Solutions Inc.</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="font-medium">Address</div>
-                    <div className="col-span-2">123 Business Ave, Suite 100<br />San Francisco, CA 94107</div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="font-medium">Tax ID / VAT</div>
-                    <div className="col-span-2">US123456789</div>
-                  </div>
-                  <div className="mt-4">
-                    <Button variant="outline" size="sm">Update Billing Information</Button>
-                  </div>
+
+              <div className="p-4 border rounded-md bg-yellow-50 text-yellow-800">
+                <h4 className="font-medium mb-2 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  Database Configuration Warning
+                </h4>
+                <p className="text-sm mb-0">
+                  Changes to the database configuration require a server restart to take effect.
+                  Please schedule maintenance time before making changes.
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button onClick={() => handleSaveSettings('Database')}>
+                <Database className="h-4 w-4 mr-2" />
+                Save Database Settings
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        {/* Billing Settings */}
+        <TabsContent value="billing">
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing Settings</CardTitle>
+              <CardDescription>
+                Configure billing and invoice settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="billingCycle">Default Billing Cycle</Label>
+                  <select 
+                    id="billingCycle"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={billingSettings.billingCycle}
+                    onChange={(e) => setBillingSettings({...billingSettings, billingCycle: e.target.value})}
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="currencyCode">Currency</Label>
+                  <select 
+                    id="currencyCode"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={billingSettings.currencyCode}
+                    onChange={(e) => setBillingSettings({...billingSettings, currencyCode: e.target.value})}
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="AUD">AUD ($)</option>
+                    <option value="CAD">CAD ($)</option>
+                    <option value="JPY">JPY (¥)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="taxRate">Default Tax Rate (%)</Label>
+                  <Input 
+                    id="taxRate" 
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={billingSettings.taxRate}
+                    onChange={(e) => setBillingSettings({...billingSettings, taxRate: parseFloat(e.target.value)})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="invoicePrefix">Invoice Number Prefix</Label>
+                  <Input 
+                    id="invoicePrefix" 
+                    value={billingSettings.invoicePrefix}
+                    onChange={(e) => setBillingSettings({...billingSettings, invoicePrefix: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gracePaymentDays">Payment Grace Period (days)</Label>
+                  <Input 
+                    id="gracePaymentDays" 
+                    type="number"
+                    min="0"
+                    value={billingSettings.gracePaymentDays}
+                    onChange={(e) => setBillingSettings({...billingSettings, gracePaymentDays: parseInt(e.target.value)})}
+                  />
+                  <p className="text-sm text-muted-foreground">Days allowed after invoice due date before penalties</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 mt-4">
+                <Switch 
+                  id="autoSuspend" 
+                  checked={billingSettings.autoSuspend}
+                  onCheckedChange={(checked) => setBillingSettings({...billingSettings, autoSuspend: checked})}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="autoSuspend">Auto-suspend Overdue Accounts</Label>
+                  <p className="text-sm text-muted-foreground">Automatically suspend accounts with overdue payments</p>
                 </div>
               </div>
             </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button onClick={() => handleSaveSettings('Billing')}>
+                <CreditCard className="h-4 w-4 mr-2" />
+                Save Billing Settings
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>

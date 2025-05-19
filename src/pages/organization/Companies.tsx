@@ -36,8 +36,8 @@ interface Company {
   name: string;
   industry: string;
   email: string;
+  subscription: 'Professional' | 'Business' | 'Enterprise';
   employees: number;
-  subscription: string;
   status: 'active' | 'inactive';
   joinedDate: string;
 }
@@ -48,50 +48,50 @@ const MOCK_COMPANIES: Company[] = [
     name: 'Acme Corporation',
     industry: 'Technology',
     email: 'contact@acme.com',
-    employees: 250,
     subscription: 'Enterprise',
+    employees: 2500,
     status: 'active',
-    joinedDate: '2023-01-15'
+    joinedDate: '2022-10-15'
   },
   {
     id: '2',
     name: 'Globex Industries',
     industry: 'Manufacturing',
     email: 'info@globex.com',
-    employees: 520,
     subscription: 'Business',
+    employees: 850,
     status: 'active',
-    joinedDate: '2023-03-22'
+    joinedDate: '2023-02-08'
   },
   {
     id: '3',
     name: 'Stark Innovations',
     industry: 'Technology',
     email: 'hello@stark.io',
-    employees: 75,
-    subscription: 'Professional',
+    subscription: 'Enterprise',
+    employees: 1200,
     status: 'active',
-    joinedDate: '2023-05-10'
+    joinedDate: '2022-12-03'
   },
   {
     id: '4',
     name: 'Wayne Enterprises',
     industry: 'Finance',
-    email: 'contact@wayne.co',
-    employees: 135,
+    email: 'info@wayne.co',
     subscription: 'Business',
+    employees: 750,
     status: 'inactive',
-    joinedDate: '2022-11-05'
+    joinedDate: '2022-08-22'
   },
   {
     id: '5',
     name: 'Umbrella Corp',
     industry: 'Healthcare',
-    email: 'info@umbrella.org',
-    employees: 310,
-    subscription: 'Enterprise',
+    email: 'contact@umbrella.org',
+    subscription: 'Professional',
+    employees: 320,
     status: 'active',
-    joinedDate: '2023-02-18'
+    joinedDate: '2023-04-10'
   }
 ];
 
@@ -106,14 +106,15 @@ const Companies: React.FC = () => {
     name: '',
     industry: '',
     email: '',
-    employees: 0,
     subscription: 'Professional',
+    employees: 0,
     status: 'active',
   });
 
   const filteredCompanies = companies.filter(company => 
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.industry.toLowerCase().includes(searchTerm.toLowerCase())
+    company.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    company.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddCompany = () => {
@@ -125,8 +126,8 @@ const Companies: React.FC = () => {
       name: newCompany.name,
       industry: newCompany.industry,
       email: newCompany.email,
+      subscription: newCompany.subscription as 'Professional' | 'Business' | 'Enterprise',
       employees: newCompany.employees,
-      subscription: newCompany.subscription,
       status: newCompany.status as 'active' | 'inactive',
       joinedDate: currentDate
     };
@@ -137,8 +138,8 @@ const Companies: React.FC = () => {
       name: '',
       industry: '',
       email: '',
-      employees: 0,
       subscription: 'Professional',
+      employees: 0,
       status: 'active',
     });
     
@@ -177,7 +178,7 @@ const Companies: React.FC = () => {
     
     toast({
       title: "Company deleted",
-      description: `${selectedCompany.name} has been removed from the platform.`,
+      description: `${selectedCompany.name} has been removed from the system.`,
     });
     
     setSelectedCompany(null);
@@ -193,10 +194,23 @@ const Companies: React.FC = () => {
     setIsDeleteDialogOpen(true);
   };
 
+  const getSubscriptionBadgeVariant = (subscription: string) => {
+    switch (subscription) {
+      case 'Enterprise':
+        return 'default';
+      case 'Business':
+        return 'secondary';
+      case 'Professional':
+        return 'outline';
+      default:
+        return 'secondary';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Companies Management</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Company Management</h1>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Company
@@ -221,8 +235,8 @@ const Companies: React.FC = () => {
             <div className="grid grid-cols-7 px-4 py-3 bg-muted/50 text-sm font-medium">
               <div className="col-span-2">Company</div>
               <div>Industry</div>
-              <div>Employees</div>
               <div>Subscription</div>
+              <div>Employees</div>
               <div>Status</div>
               <div className="text-right">Actions</div>
             </div>
@@ -231,7 +245,7 @@ const Companies: React.FC = () => {
                 <div key={company.id} className="grid grid-cols-7 px-4 py-3 items-center">
                   <div className="col-span-2 flex items-center">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-3">
-                      {company.name.substring(0, 2).toUpperCase()}
+                      {company.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <div className="font-medium">{company.name}</div>
@@ -239,8 +253,12 @@ const Companies: React.FC = () => {
                     </div>
                   </div>
                   <div>{company.industry}</div>
+                  <div>
+                    <Badge variant={getSubscriptionBadgeVariant(company.subscription)}>
+                      {company.subscription}
+                    </Badge>
+                  </div>
                   <div>{company.employees}</div>
-                  <div>{company.subscription}</div>
                   <div>
                     <Badge variant={company.status === 'active' ? 'default' : 'secondary'}>
                       {company.status}
@@ -285,7 +303,7 @@ const Companies: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Add New Company</DialogTitle>
             <DialogDescription>
-              Add a new company to the platform. All fields are required.
+              Add a new company to the platform. Fill out the required information.
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
@@ -304,41 +322,41 @@ const Companies: React.FC = () => {
                 id="industry"
                 value={newCompany.industry}
                 onChange={(e) => setNewCompany({...newCompany, industry: e.target.value})}
-                placeholder="e.g. Technology"
+                placeholder="Enter company industry"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Contact Email</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={newCompany.email}
                 onChange={(e) => setNewCompany({...newCompany, email: e.target.value})}
-                placeholder="contact@company.com"
+                placeholder="company@example.com"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subscription">Subscription Plan</Label>
+              <select
+                id="subscription"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={newCompany.subscription}
+                onChange={(e) => setNewCompany({...newCompany, subscription: e.target.value as 'Professional' | 'Business' | 'Enterprise'})}
+              >
+                <option value="Professional">Professional</option>
+                <option value="Business">Business</option>
+                <option value="Enterprise">Enterprise</option>
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="employees">Employees</Label>
               <Input
                 id="employees"
                 type="number"
-                value={newCompany.employees.toString()}
+                value={newCompany.employees}
                 onChange={(e) => setNewCompany({...newCompany, employees: parseInt(e.target.value) || 0})}
                 placeholder="Number of employees"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="subscription">Subscription</Label>
-              <select
-                id="subscription"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={newCompany.subscription}
-                onChange={(e) => setNewCompany({...newCompany, subscription: e.target.value})}
-              >
-                <option value="Professional">Professional</option>
-                <option value="Business">Business</option>
-                <option value="Enterprise">Enterprise</option>
-              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
@@ -388,7 +406,7 @@ const Companies: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-email">Contact Email</Label>
+                <Label htmlFor="edit-email">Email</Label>
                 <Input
                   id="edit-email"
                   type="email"
@@ -397,26 +415,26 @@ const Companies: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-employees">Employees</Label>
-                <Input
-                  id="edit-employees"
-                  type="number"
-                  value={selectedCompany.employees.toString()}
-                  onChange={(e) => setSelectedCompany({...selectedCompany, employees: parseInt(e.target.value) || 0})}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-subscription">Subscription</Label>
+                <Label htmlFor="edit-subscription">Subscription Plan</Label>
                 <select
                   id="edit-subscription"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={selectedCompany.subscription}
-                  onChange={(e) => setSelectedCompany({...selectedCompany, subscription: e.target.value})}
+                  onChange={(e) => setSelectedCompany({...selectedCompany, subscription: e.target.value as 'Professional' | 'Business' | 'Enterprise'})}
                 >
                   <option value="Professional">Professional</option>
                   <option value="Business">Business</option>
                   <option value="Enterprise">Enterprise</option>
                 </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-employees">Employees</Label>
+                <Input
+                  id="edit-employees"
+                  type="number"
+                  value={selectedCompany.employees}
+                  onChange={(e) => setSelectedCompany({...selectedCompany, employees: parseInt(e.target.value) || 0})}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-status">Status</Label>
@@ -453,7 +471,7 @@ const Companies: React.FC = () => {
               <p className="mb-2">You are about to delete:</p>
               <div className="p-4 rounded-md bg-muted">
                 <p className="font-medium">{selectedCompany.name}</p>
-                <p className="text-sm text-muted-foreground">{selectedCompany.industry} • {selectedCompany.employees} employees</p>
+                <p className="text-sm text-muted-foreground">{selectedCompany.email} • {selectedCompany.industry}</p>
               </div>
             </div>
           )}
